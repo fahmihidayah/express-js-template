@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 30
+    },
+    "auditLog": "/Users/s/Documents/NodeJs/express-clean/blog-api/src/utils/debug/.9190e1e9efe9173a45080307b410ff0c20a0a57e-audit.json",
+    "files": [
+        {
+            "date": 1689243123881,
+            "name": "/Users/s/Documents/NodeJs/express-clean/blog-api/src/utils/debug/2023-07-13.log",
+            "hash": "a0c7905d0bfeec2f268702993ab9e852e668f1c3c2d80ab5f5b1c8aba2a78abc"
+        }
+    ],
+    "hashType": "sha256"
+}
