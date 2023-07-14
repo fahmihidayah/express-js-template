@@ -1,10 +1,10 @@
-# Express API Starter with Typescript
+# Express API Starter with Typescript 
 
-How to use this template:
+Template Express Js using Typescript
 
-```sh
+<!-- ```sh
 npx create-express-api --typescript --directory my-api-name
-```
+``` -->
 
 Includes API Server utilities:
 
