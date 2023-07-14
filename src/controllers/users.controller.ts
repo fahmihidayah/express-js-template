@@ -10,6 +10,9 @@ import {
 import { TYPE_SERVICE } from "../services";
 import { UserService } from "../services/user.service";
 import { SECRET_KEY } from "../config";
+import { CreateUserDto } from "../dtos/user";
+import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
+import { ValidationMiddleware } from "../middlewares/validation";
 
 
 @controller("/users")
@@ -26,9 +29,10 @@ export class UserController extends BaseHttpController {
         return await this._userService.findAll();
     }
 
-    @httpPost("/login")
+    @httpPost("/login", TYPE_MIDDLWARE_VALIDATION.LoginValidationMiddleware)
     public async login (@request() request : express.Request) {
-        console.log(request.body)
+        const userDto = {... request.body}
+        console.log(userDto)
         return this.json({
             message : "Success Login",
             code : 200,
@@ -36,9 +40,10 @@ export class UserController extends BaseHttpController {
         })
     }
 
-    @httpPost("/register")
+    @httpPost("/register", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
     public async register(@request() request : express.Request) {
-        console.log(request.body)
+        const userDto = {... request.body}
+        console.log(userDto)
         return this.json({
             message : "Register Success",
             code : 200,

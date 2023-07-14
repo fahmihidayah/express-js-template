@@ -12,7 +12,7 @@ import { Container } from 'inversify';
 import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-utils';
 import { CREDENTIALS, LOG_FORMAT, ORIGIN } from './config';
 import cookieParser from 'cookie-parser';
-import { server } from './containers';
+import { server } from './modules';
 
 
 server.setConfig((app) => {
