@@ -35,7 +35,7 @@ export class UpdateUserDto {
 
 
 export type UserData = {
-    id: string;
+    id: number;
     name: string;
     email: string;
 }

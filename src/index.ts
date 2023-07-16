@@ -13,6 +13,7 @@ import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-util
 import { CREDENTIALS, LOG_FORMAT, ORIGIN } from './config';
 import cookieParser from 'cookie-parser';
 import { server } from './modules';
+import { ErrorFunctionMiddleware } from './middlewares/error.middleware';
 
 
 server.setConfig((app) => {
@@ -34,6 +35,10 @@ server.setConfig((app) => {
   app.use(helmet());
   app.use(cors());
 });
+
+server.setErrorConfig((app) => {
+  app.use(ErrorFunctionMiddleware)
+})
 
 let app = server.build();
 app.listen(3000);

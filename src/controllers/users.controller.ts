@@ -13,6 +13,7 @@ import { SECRET_KEY } from "../config";
 import { CreateUserDto } from "../dtos/user";
 import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 import { ValidationMiddleware } from "../middlewares/validation";
+import { TYPE_MIDDLEWARE } from "../middlewares";
 
 
 @controller("/users")

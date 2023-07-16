@@ -8,6 +8,7 @@ export interface UserService {
     login(form : LoginUserDto) : Promise<UserWithToken>
     register(form : CreateUserDto) : Promise<UserData | unknown>
     findAll() : Promise<User[]>
+    findById(id : number) : Promise<UserData | unknown>
 }
 
 
@@ -18,6 +19,13 @@ export class UserServiceImpl implements UserService {
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient
     ) {
 
+    }
+    public async findById(id : number): Promise<UserData | unknown> {
+        return await this._prismaClient.user.findFirst({
+            where : {
+                id : id
+            }
+        })
     }
     public async findAll(): Promise<User[]> {
       return await this._prismaClient.user.findMany()
