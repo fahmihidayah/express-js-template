@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strict": true,
+    "strictNullChecks": true,
     "skipLibCheck": true
   },
   "paths": {

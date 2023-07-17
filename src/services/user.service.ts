@@ -3,6 +3,8 @@ import {CreateUserDto, LoginUserDto, UserData, UserWithToken } from "../dtos/use
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime";
+import { TYPE_REPOSITORY } from "../repositories";
+import { UserRepository } from "../repositories/user.repository";
 
 export interface UserService {
     login(form : LoginUserDto) : Promise<UserWithToken>
@@ -16,27 +18,19 @@ export interface UserService {
 export class UserServiceImpl implements UserService {
 
     constructor(
-        @inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient
+        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository : UserRepository
     ) {
 
     }
     public async findById(id : number): Promise<UserData | unknown> {
-        return await this._prismaClient.user.findFirst({
-            where : {
-                id : id
-            }
-        })
+        return await this._userRepository.findById(id)
     }
     public async findAll(): Promise<User[]> {
-      return await this._prismaClient.user.findMany()
+      return await this._userRepository.findAll()
     }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {
-        const user = await this._prismaClient.user.findUnique({
-            where : {
-                email : form.email
-            }
-        })
+        const user = await this._userRepository.findByEmail(form.email)
 
         return {
            name : "fahmi",
@@ -47,9 +41,7 @@ export class UserServiceImpl implements UserService {
     }
     
     public async register(form: CreateUserDto): Promise<UserData | unknown> {
-        const newUser = await this._prismaClient.user.create({
-            data : form
-        })
+        const newUser = await this._userRepository.createUser(form)
         return newUser
     }
 }
