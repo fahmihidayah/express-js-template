@@ -1,5 +1,5 @@
 import { GetResult } from "@prisma/client/runtime";
-import { CreateUserDto } from "../../dtos/user";
+import { CreateUserDto, UpdateUserDto, UpdateUserFormDto } from "../../dtos/user";
 import { UserRepository } from "../../repositories/user.repository";
 import { inject, injectable } from "inversify";
 import { PrismaClient, User } from "@prisma/client";
@@ -36,12 +36,29 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async update(id: number, user: CreateUserDto): Promise<User | null> {
+    async update(id: number, userForm: UpdateUserFormDto): Promise<User | null> {
+        let user = await this._prismaClient.user.findFirst({where: {id : id}})
+        let updatedUserForm = {
+            ... user
+        }
+
+        if(userForm.email) {
+            updatedUserForm.email = userForm.email
+        }
+        
+        if(userForm.name) {
+            updatedUserForm.name = userForm.name
+        }
+
+        if(userForm.password) {
+            updatedUserForm.password = userForm.password
+        }
+
         return await this._prismaClient.user.update({
             where: {
                 id: id
             },
-            data: user
+            data: updatedUserForm
         })
     }
 

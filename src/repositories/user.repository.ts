@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { CreateUserDto, UserData } from "../dtos/user";
+import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
 
 export interface UserRepository {
     createUser(user : CreateUserDto) : Promise<User | null>
@@ -8,7 +8,7 @@ export interface UserRepository {
 
     findById(id : number) : Promise<User | null>
 
-    update(id : number, user : CreateUserDto) : Promise<User | null>
+    update(id : number, userForm : UpdateUserFormDto) : Promise<User | null>
 
     findAll() : Promise<User[]>
 }

@@ -52,4 +52,11 @@ export class UserController extends BaseHttpController {
         })
     }
 
+    @httpGet("/profile") 
+    public async getProfile(@request() request : express.Request) {
+        return this.json({
+            
+        })
+    }
+
 }

@@ -25,6 +25,15 @@ export class CreateUserDto {
     public password: string = "";
 }
 
+export class UpdateUserFormDto {
+    
+    public name: string | null = null
+
+    public email: string | null = null;
+
+    public password: string | null = null;
+}
+
 export class UpdateUserDto {
     @IsString()
     @IsNotEmpty()
