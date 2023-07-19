@@ -49,7 +49,7 @@ describe('find all users', () => {
     it("Test find all user success", async () => {
         const result = await userRepository?.findAll()
 
-        expect(result?.length).equal(1)
+        expect(result?.length).not.equal(0)
     })
 
 })

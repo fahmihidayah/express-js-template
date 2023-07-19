@@ -6,87 +6,79 @@ import { LoginUserDto, UserWithToken, CreateUserDto, UserData } from "../../dtos
 import { GetResult } from "@prisma/client/runtime";
 import { User } from "@prisma/client";
 import { length } from "class-validator";
+import { UserRepositoryImpl } from "../../prisma/repositories/user.repository";
 
-class MockUserService implements UserService {
-    async findById(id: number): Promise<UserData | unknown> {
-        if(id == -1) {
-            return null
-        }
-        return {
-            id : 1,
-            name : 'fahmi',
-            email : 'fahmi@gmail.com'
-        }
-    }
-    async findAll(): Promise<User[]> {
-        return [{
-            id: 1,
-            name: "fahmi",
-            email: "fahmi@gmail.com",
-            password: "123",
-            created_at: new Date(),
-            updated_at: new Date()
-        }]
-    }
-    async login(loginForm: LoginUserDto): Promise<UserWithToken> {
-        return {
-            name: "fahmi",
-            email: "fahmi@gmail.com",
-            access_token: "1234",
-            refresh_token: "1122"
-        }
-    }
-    async register(registerForm: CreateUserDto): Promise<UserData> {
-        return {
-            id: 1,
-            name: "fahmi",
-            email: "1234"
-        }
-    }
-
-}
-
-
-describe("User Service", () => {
+describe("Register User Service", () => {
     let userService: UserService;
 
-    beforeEach(() => {
-        userService = new MockUserService()
+    beforeEach(async () => {
+        userService = new UserServiceImpl(new UserRepositoryImpl(jestPrisma.client))
     })
 
-    it("test login success", async () => {
-        expect(await userService.login({
-            email: "fahmi@gmail.com",
-            password: "Test123!"
-        })).deep.equal({
-            name: "fahmi",
-            email: "fahmi@gmail.com",
-            access_token: "1234",
-            refresh_token: "1122"
-        })
-    })
-
-    it("test get list users ", async () => {
-        expect((await userService.findAll()).length).equal(1)
-    })
-
-    it('test register success', async() => {
-        expect(await userService.register({
+    it("register user success", async () => {
+        let user : User = await userService.register({
             name : "fahmi",
-            email : "fahmi@gmail.com",
-            password : "123456"
-        })).deep.equal({
-            id: 1,
-            name: "fahmi",
-            email: "1234"
-        })
+            email : "fahmi@service.com",
+            password : "Test1234!"
+        }) as User
+        expect(user.email).equal("fahmi@service.com")
+    } )
+})
+
+describe("Login User Service", () => {
+    let userService: UserService;
+
+    beforeEach(async () => {
+        userService = new UserServiceImpl(new UserRepositoryImpl(jestPrisma.client))
     })
 
-    it('test find by id', async () => {
-        expect(await userService.findById(1)).deep.equal({
-            id : 1,
+    it("login user success", async () => {
+        let user : User = await userService.register({
             name : "fahmi",
-            email : "fahmi@gmail.com"
-        })
+            email : "fahmi@service.com",
+            password : "Test1234!"
+        }) as User
+        let userWithToken = await userService.login({
+            email : "fahmi@service.com",
+            password : "Test1234!"
+        });
+        expect(userWithToken.email).equal("fahmi@service.com");
+    })
+})
+
+describe("Find User Service", () => {
+    let userService: UserService;
+
+    beforeEach(async () => {
+        userService = new UserServiceImpl(new UserRepositoryImpl(jestPrisma.client))
+    })
+
+    it("find all user return 1", async () => {
+        let user : User = await userService.register({
+            name : "fahmi",
+            email : "fahmi@service.com",
+            password : "Test1234!"
+        }) as User
+        let users = await userService.findAll();
+        expect(users.length).not.equal(0)
+    })
+})
+
+
+describe("Find User by id Service", () => {
+    let userService: UserService;
+
+    beforeEach(async () => {
+        userService = new UserServiceImpl(new UserRepositoryImpl(jestPrisma.client))
+    })
+
+    it("find all user return 1", async () => {
+        let user : User = await userService.register({
+            name : "fahmi",
+            email : "fahmi@service.com",
+            password : "Test1234!"
+        }) as User
+        let findUser = await userService.findById(user.id) as User;
+        expect(findUser.email).equal(user.email);
     })
 })

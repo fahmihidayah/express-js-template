@@ -39,7 +39,7 @@ export class UserServiceImpl implements UserService {
         const secretKey: string | undefined = SECRET_KEY;
         const expiresIn: number = 60 * 60;
     
-        return { expiresIn, token: sign(dataStoredInToken, secretKey??"", { expiresIn }) };
+        return { expiresIn, token: sign(dataStoredInToken, secretKey??"123456789", { expiresIn }) };
       }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {
