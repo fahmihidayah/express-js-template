@@ -5,6 +5,11 @@ import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime";
 import { TYPE_REPOSITORY } from "../repositories";
 import { UserRepository } from "../repositories/user.repository";
+import { compare, hash } from 'bcrypt';
+import { HttpException } from "../exceptions/httpException";
+import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
+import { SECRET_KEY } from "../config";
+import { sign } from "jsonwebtoken";
 
 export interface UserService {
     login(form : LoginUserDto) : Promise<UserWithToken>
@@ -29,19 +34,37 @@ export class UserServiceImpl implements UserService {
       return await this._userRepository.findAll()
     }
 
+    public createToken(user: User): TokenData {
+        const dataStoredInToken: DataStoredInToken = { id: user.id };
+        const secretKey: string | undefined = SECRET_KEY;
+        const expiresIn: number = 60 * 60;
+    
+        return { expiresIn, token: sign(dataStoredInToken, secretKey??"", { expiresIn }) };
+      }
+
     public async login(form: LoginUserDto): Promise<UserWithToken> {
         const user = await this._userRepository.findByEmail(form.email)
+        if (!user) throw new HttpException(409, `This email ${form.email} was not found`);
+    
+        const isPasswordMatching: boolean = await compare(form.password, user.password);
+        if (!isPasswordMatching) throw new HttpException(409, "Password is not matching");
+    
+        const tokenData = this.createToken(user);
+        // const cookie = this.createCookie(tokenData);
 
         return {
-           name : "fahmi",
-           email : "fahmi@gmail.com",
-           access_token : "1234",
-           refresh_token : "1122"
+           name : user.name,
+           email : user.email,
+           access_token : tokenData.token,
+           refresh_token : "",
+           expire_in : tokenData.expiresIn
         }
     }
     
     public async register(form: CreateUserDto): Promise<UserData | unknown> {
-        const newUser = await this._userRepository.createUser(form)
+        const hashPassword = await hash(form.password, 10)
+        const encryptForm = {... form, password : hashPassword }
+        const newUser = await this._userRepository.createUser(encryptForm)
         return newUser
     }
 }

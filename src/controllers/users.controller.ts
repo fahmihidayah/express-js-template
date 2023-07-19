@@ -33,22 +33,24 @@ export class UserController extends BaseHttpController {
     @httpPost("/login", TYPE_MIDDLWARE_VALIDATION.LoginValidationMiddleware)
     public async login (@request() request : express.Request) {
         const userDto = {... request.body}
-        console.log(userDto)
+        const userToken = await this._userService.login(userDto)
         return this.json({
-            message : "Success Login",
+            message : "Login Success",
             code : 200,
-            error : false
+            error : false,
+            data : userToken
         })
     }
 
     @httpPost("/register", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
     public async register(@request() request : express.Request) {
         const userDto = {... request.body}
-        console.log(userDto)
+        const user = this._userService.register(userDto)
         return this.json({
             message : "Register Success",
             code : 200,
-            error : false 
+            error : false,
+            data : user
         })
     }
 

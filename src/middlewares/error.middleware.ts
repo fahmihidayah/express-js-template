@@ -33,10 +33,12 @@ export class ErrorMiddleware extends BaseMiddleware {
       // const message: string = error.message || 'Something went wrong';
   
       // logger.error(`[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`);
-      res.status(req.statusCode??500).json({ message : "Error" });
+      res.status(req.statusCode??500).json({ status : req.statusCode??500, message : "Error", error : true });
     } catch (error ) {
       res.status(req.statusCode??500).json({
-        message : error
+        status : req.statusCode??500,
+        message : error,
+        error : true
       })
     }
   }
