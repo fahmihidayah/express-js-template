@@ -10,10 +10,11 @@ import {
 import { TYPE_SERVICE } from "../services";
 import { UserService } from "../services/user.service";
 import { SECRET_KEY } from "../config";
-import { CreateUserDto } from "../dtos/user";
+import { CreateUserDto, UserData } from "../dtos/user";
 import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 import { ValidationMiddleware } from "../middlewares/validation";
 import { TYPE_MIDDLEWARE } from "../middlewares";
+import { RequestWithUser } from "../interfaces/auth.interfaces";
 
 
 @controller("/users")
@@ -27,7 +28,13 @@ export class UserController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        return await this._userService.findAll();
+        const users : UserData [] = await this._userService.findAll()
+        return this.json({
+            message : "Users Loaded",
+            code : 200,
+            error : false,
+            data : users
+        })
     }
 
     @httpPost("/login", TYPE_MIDDLWARE_VALIDATION.LoginValidationMiddleware)
@@ -45,7 +52,7 @@ export class UserController extends BaseHttpController {
     @httpPost("/register", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
     public async register(@request() request : express.Request) {
         const userDto = {... request.body}
-        const user = this._userService.register(userDto)
+        const user = await this._userService.register(userDto)
         return this.json({
             message : "Register Success",
             code : 200,
@@ -54,10 +61,21 @@ export class UserController extends BaseHttpController {
         })
     }
 
-    @httpGet("/profile") 
-    public async getProfile(@request() request : express.Request) {
+    @httpGet("/profile", TYPE_MIDDLEWARE.AuthMiddleware) 
+    public async getProfile(@request() request : RequestWithUser) {
+        const user = {
+            id : request.user.id,
+            name : request.user.name,
+            email : request.user.email,
+            created_at : request.user.created_at,
+            updated_at : request.user.updated_at
+        }
+
         return this.json({
-            
+            message : "Get Profile Success",
+            code : 200,
+            error : false,
+            data : user
         })
     }
 

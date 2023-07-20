@@ -43,13 +43,15 @@ export class UpdateUserDto {
 }
 
 
-export type UserData = {
-    id: number;
-    name: string;
-    email: string;
+export interface UserData  {
+    id: number | null;
+    name: string | null;
+    email: string | null;
+    created_at : Date | null;
+    updated_at : Date | null;
 }
 
-export type UserWithToken = {
+export interface UserWithToken {
     name: string;
     email: string;
     access_token: string;
