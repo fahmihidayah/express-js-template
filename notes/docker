@@ -1,0 +1,6 @@
+issue : 
+1. still error when running dev env 
+
+todo : 
+1. need test production env
+2. test docker compose
