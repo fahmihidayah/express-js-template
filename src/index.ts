@@ -9,7 +9,7 @@ import * as bodyParser from 'body-parser';
 import "./controllers/users.controller";
 import { Container } from 'inversify';
 import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-utils';
-import { CREDENTIALS, LOG_FORMAT, ORIGIN } from './config';
+import { CREDENTIALS, LOG_FORMAT, ORIGIN, PORT } from './config';
 import cookieParser from 'cookie-parser';
 import { server } from './modules';
 import { ErrorFunctionMiddleware } from './middlewares/error.middleware';
@@ -40,7 +40,7 @@ server.setErrorConfig((app) => {
 })
 
 let app = server.build();
-app.listen(3000);
+app.listen(PORT);
 
 
 // app.listen(port, () => {
