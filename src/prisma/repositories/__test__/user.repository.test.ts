@@ -3,15 +3,15 @@ import { UserRepository } from "../../../repositories/user.repository"
 import { UserRepositoryImpl } from "../user.repository";
 import { expect } from "chai";
 import { prismaMock } from "../../singleton";
+import { User } from ".prisma/client";
 
 
 function createUserRepository(): UserRepository {
     return new UserRepositoryImpl(prismaMock)
 }
 
-describe('user repository', () => {
-    let userRepository: UserRepository = createUserRepository();
-    let user = {
+function getSampleUser() : User{
+    return {
         id: 1,
         name: 'fahmi',
         email: 'fahmi@gmail.com',
@@ -19,6 +19,11 @@ describe('user repository', () => {
         created_at: new Date(),
         updated_at: new Date(),
     }
+}
+
+describe('user repository', () => {
+    let userRepository: UserRepository = createUserRepository();
+    let user = getSampleUser()
 
     test("create user success", async () => {
 
@@ -87,34 +92,3 @@ describe('user repository', () => {
         expect(result?.email).equal("abc@testmail.com")
     })
 })
-
-
-// describe('update user by id', () => {
-//     let userRepository : UserRepository
-//     let user : User | null 
-
-//     beforeEach( async () => {
-//         userRepository = createUserRepository()
-//         user = await createUser(userRepository)
-//     })
-
-//     it('test update all user fields by id success', async () => {
-//         const result = await userRepository.update(user?.id!!, {
-//             name : "fahmi",
-//             email: "fahmi@testmail.com",
-//             password : "Test123!"
-//         })
-
-//         expect(result?.email).equal('fahmi@testmail.com')
-//     })
-
-//     it('test update single user fields by id success', async () => {
-//         const result = await userRepository.update(user?.id!!, {
-//             name : null,
-//             email : "abc@gmail.com",
-//             password : null
-//         })
-
-//         expect(result?.email).equal("abc@gmail.com")
-//     })
-// })

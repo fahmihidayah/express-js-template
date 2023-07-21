@@ -2,7 +2,6 @@ import { Prisma, PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { GetResult } from "@prisma/client/runtime";
 import { TYPE_REPOSITORY } from "../repositories";
 import { UserRepository } from "../repositories/user.repository";
 import { compare, hash } from 'bcrypt';
@@ -49,7 +48,7 @@ export class UserServiceImpl implements UserService {
         const secretKey: string | undefined = SECRET_KEY;
         const expiresIn: number = 60 * 60;
 
-        return { expiresIn, token: sign(dataStoredInToken, secretKey ?? "", { expiresIn }) };
+        return { expiresIn, token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn }) };
     }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {
@@ -74,7 +73,7 @@ export class UserServiceImpl implements UserService {
     public async register(form: CreateUserDto): Promise<UserData | unknown> {
         const hashPassword = await hash(form.password, 10)
         const encryptForm = { ...form, password: hashPassword }
-        const newUser = await this._userRepository.createUser(encryptForm)
+        const newUser = await this._userRepository.create(encryptForm)
         return {
             id: newUser?.id,
             name: newUser?.name,
