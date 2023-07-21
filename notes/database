@@ -1,6 +1,4 @@
 1. need implement seeding 
 2. need add faker 
 
-1. using prisma need to run generate command 
-npx prisma generate --generator client
-update prisma library to 5.0.0
+1. using prisma need to run generate command (done)
