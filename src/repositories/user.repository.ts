@@ -2,7 +2,7 @@ import { User } from "@prisma/client";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
 
 export interface UserRepository {
-    createUser(user : CreateUserDto) : Promise<User | null>
+    create(user : CreateUserDto) : Promise<User | null>
     
     findByEmail(email : string) : Promise<User | null>
 

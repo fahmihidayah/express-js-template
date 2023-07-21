@@ -1,100 +1,70 @@
 import "reflect-metadata";
-import { PrismaClient, User } from "@prisma/client"
-import { mocked } from "jest-mock";
-import { createMockContext } from "../../context"
 import { UserRepository } from "../../../repositories/user.repository"
 import { UserRepositoryImpl } from "../user.repository";
 import { expect } from "chai";
+import { prismaMock } from "../../singleton";
 
 
 function createUserRepository(): UserRepository {
-    return new UserRepositoryImpl(jestPrisma.client)
+    return new UserRepositoryImpl(prismaMock)
 }
 
-async function createUser(userRepository: UserRepository) : Promise<User|null> {
-    return await userRepository?.createUser({
-        name: "fahmi",
-        email: "fahmi@test.com",
-        password: "1234Test!"
-    })
-}
-
-describe('create user', () => {
-    let userRepository: UserRepository | null;
-
-    beforeEach(() => {
-        userRepository = createUserRepository()
-    })
-
-    const userDto = {
-        name: "fahmi",
-        email: "fahmi@test.com",
-        password: "1234Test!"
+describe('user repository', () => {
+    let userRepository: UserRepository = createUserRepository();
+    let user = {
+        id: 1,
+        name: 'fahmi',
+        email: 'fahmi@gmail.com',
+        password: "Test@1234",
+        created_at: new Date(),
+        updated_at: new Date(),
     }
 
-    it("success created", async () => {
-        const userData = await userRepository?.createUser(userDto)
-        expect(userData?.name).equal("fahmi")
-    })
-})
+    test("create user success", async () => {
 
-describe('find all users', () => {
-    let userRepository: UserRepository
+        const userDto = {
+            name: "fahmi",
+            email: "fahmi@gmail.com",
+            password: "Test@1234"
+        }
 
-    beforeEach(async () => {
-        userRepository = createUserRepository()
-        await createUser(userRepository)
-    })
+        prismaMock.user.create.mockResolvedValue(user)
 
-    it("Test find all user success", async () => {
-        const result = await userRepository?.findAll()
-
-        expect(result?.length).not.equal(0)
+        const newUser = await userRepository?.create(userDto)
+        expect(newUser?.name).equal("fahmi")
     })
 
-})
+    test('find all users success', async () => {
+        
+        prismaMock.user.findMany.mockResolvedValue([user])
 
-describe('find user by id', () => {
-    let userRepository: UserRepository
-    let user : User | null 
+        const result = await userRepository?.findAll();
 
-    beforeEach(async () => {
-        userRepository = createUserRepository()
-        user = await createUser(userRepository)
+        expect(result.length).equal(1)
     })
 
-    it('Test find user by id success', async () => {
-        const result = await userRepository?.findById(user?.id!!);
-        expect(result?.id).deep.equal(user?.id)
-    })
-})
+    test('find user by id', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(user)
 
-describe('find user by email', () => {
-    let userRepository: UserRepository
-    let user : User | null 
+        const result = await userRepository?.findById(1)
 
-    beforeEach(async () => {
-        userRepository = createUserRepository();
-        user = await createUser(userRepository)
+        expect(result?.email).equal('fahmi@gmail.com')
     })
 
-    it('Test find user by email success', async () => {
-        const result = await userRepository?.findByEmail(user?.email!!)
-        expect(result?.id).equal(user?.id)
-    })
-})
+    test('find user by email', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(user)
 
-describe('update user by id', () => {
-    let userRepository : UserRepository
-    let user : User | null 
+        const result = await userRepository?.findByEmail('fahmi@gmail.com')
 
-    beforeEach( async () => {
-        userRepository = createUserRepository()
-        user = await createUser(userRepository)
+        expect(result?.email).equal('fahmi@gmail.com')
     })
 
-    it('test update all user fields by id success', async () => {
-        const result = await userRepository.update(user?.id!!, {
+    test('update all user fields by id success', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(user)
+        prismaMock.user.update.mockResolvedValue({
+            ... user, email : "fahmi@testmail.com"
+        })
+        const result = await userRepository.update(user.id, {
             name : "fahmi",
             email: "fahmi@testmail.com",
             password : "Test123!"
@@ -103,13 +73,48 @@ describe('update user by id', () => {
         expect(result?.email).equal('fahmi@testmail.com')
     })
 
-    it('test update single user fields by id success', async () => {
+    test('update single user fields by id success', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(user)
+        prismaMock.user.update.mockResolvedValue({
+            ... user, email : "abc@testmail.com"
+        })
         const result = await userRepository.update(user?.id!!, {
             name : null,
-            email : "abc@gmail.com",
+            email : "abc@testmail.com",
             password : null
         })
 
-        expect(result?.email).equal("abc@gmail.com")
+        expect(result?.email).equal("abc@testmail.com")
     })
 })
+
+
+// describe('update user by id', () => {
+//     let userRepository : UserRepository
+//     let user : User | null 
+
+//     beforeEach( async () => {
+//         userRepository = createUserRepository()
+//         user = await createUser(userRepository)
+//     })
+
+//     it('test update all user fields by id success', async () => {
+//         const result = await userRepository.update(user?.id!!, {
+//             name : "fahmi",
+//             email: "fahmi@testmail.com",
+//             password : "Test123!"
+//         })
+
+//         expect(result?.email).equal('fahmi@testmail.com')
+//     })
+
+//     it('test update single user fields by id success', async () => {
+//         const result = await userRepository.update(user?.id!!, {
+//             name : null,
+//             email : "abc@gmail.com",
+//             password : null
+//         })
+
+//         expect(result?.email).equal("abc@gmail.com")
+//     })
+// })

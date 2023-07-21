@@ -1,4 +1,3 @@
-import { GetResult } from "@prisma/client/runtime";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto } from "../../dtos/user";
 import { UserRepository } from "../../repositories/user.repository";
 import { inject, injectable } from "inversify";
@@ -15,21 +14,21 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     async findById(id: number): Promise<User | null> {
-        return await this._prismaClient.user.findFirst({
+        return await this._prismaClient.user.findUnique({
             where: {
                 id: id
             }
         })
     }
 
-    async createUser(user: CreateUserDto): Promise<User | null> {
+    async create(user: CreateUserDto): Promise<User | null> {
         return await this._prismaClient.user.create({
             data: user
         })
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return await this._prismaClient.user.findFirst({
+        return await this._prismaClient.user.findUnique({
             where: {
                 email: email
             }
@@ -37,7 +36,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     async update(id: number, userForm: UpdateUserFormDto): Promise<User | null> {
-        let user = await this._prismaClient.user.findFirst({where: {id : id}})
+        let user = await this.findById(id)
         let updatedUserForm = {
             ... user
         }

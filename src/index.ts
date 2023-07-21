@@ -9,10 +9,11 @@ import * as bodyParser from 'body-parser';
 import "./controllers/users.controller";
 import { Container } from 'inversify';
 import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-utils';
-import { CREDENTIALS, LOG_FORMAT, ORIGIN, PORT } from './config';
+import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from './config';
 import cookieParser from 'cookie-parser';
 import { server } from './modules';
 import { ErrorFunctionMiddleware } from './middlewares/error.middleware';
+import { logger } from './utils/logger';
 
 
 server.setConfig((app) => {
@@ -40,7 +41,13 @@ server.setErrorConfig((app) => {
 })
 
 let app = server.build();
-app.listen(PORT);
+app.listen(PORT, () => {
+
+  logger.info(`=================================`);
+  logger.info(`======= ENV: ${NODE_ENV} =======`);
+  logger.info(`🚀 App listening on the port ${PORT}`);
+  logger.info(`=================================`);
+});
 
 
 // app.listen(port, () => {
