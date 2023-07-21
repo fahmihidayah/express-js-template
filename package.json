@@ -13,7 +13,7 @@
     "prisma:generate": "prisma generate",
     "build": "tsc",
     "lint": "eslint --fix src test",
-    "test": "jest",
+    "test": "jest --forceExit --detectOpenHandles",
     "test:unit": "ENV_FILE=.env.development.local jest",
     "typecheck": "tsc --noEmit",
     "test:ci": "DATABASE_URL=\"file:./test.db\" jest",

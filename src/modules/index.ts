@@ -5,6 +5,7 @@ import { middleWareContainerModule } from "./middleware.container";
 import { serviceContainerModule } from "./service.container";
 import { validationMiddlewareContainerModule } from "./validation.middleware.module";
 import { repositoryContainerModule } from "./repository.container";
+// import "./controllers/users.controller";
 
 function mergeContainer(containers: Array<Container>): Container {
     let finalContainer: any = containers[0];
@@ -16,14 +17,15 @@ function mergeContainer(containers: Array<Container>): Container {
     return finalContainer
 }
 
-const container = new Container();
+const container = new Container({ autoBindInjectable: true });
 
 container.load(
     prismaContainerModule,
     repositoryContainerModule,
     middleWareContainerModule,
     serviceContainerModule,
-    validationMiddlewareContainerModule)
+    validationMiddlewareContainerModule
+    )
 
 const port = process.env.PORT || 3000;
 

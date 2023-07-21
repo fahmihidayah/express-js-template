@@ -8,6 +8,7 @@ import { BaseMiddleware } from 'inversify-express-utils';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { injectable } from 'inversify';
+import prisma from '../prisma/client';
 // import { SECRET_KEY } from '@config';
 // import { HttpException } from '@exceptions/httpException';
 // import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
@@ -31,9 +32,9 @@ export class AuthMiddleware extends BaseMiddleware {
             const auth = getAuthorization(req);
 
             if (auth) {
-                const { id } = (await verify(auth, SECRET_KEY ?? "")) as JwtPayload;
+                const { id } = (await verify(auth, SECRET_KEY ?? "test-1234")) as JwtPayload;
 
-                const users = new PrismaClient().user;
+                const users = prisma.user;
                 const findUser = await users.findUnique({ where: { id: Number(id) } });
 
                 if (findUser) {

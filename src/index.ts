@@ -40,14 +40,15 @@ server.setErrorConfig((app) => {
   app.use(ErrorFunctionMiddleware)
 })
 
-let app = server.build();
-app.listen(PORT, () => {
+export let app = server.build();
+// app.listen(PORT, () => {
 
-  logger.info(`=================================`);
-  logger.info(`======= ENV: ${NODE_ENV} =======`);
-  logger.info(`🚀 App listening on the port ${PORT}`);
-  logger.info(`=================================`);
-});
+//   logger.info(`=================================`);
+//   logger.info(`======= ENV: ${NODE_ENV} =======`);
+//   logger.info(`🚀 App listening on the port ${PORT}`);
+//   logger.info(`=================================`);
+// });
+
 
 
 // app.listen(port, () => {
