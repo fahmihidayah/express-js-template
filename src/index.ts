@@ -15,6 +15,9 @@ import { server } from './modules';
 import { ErrorFunctionMiddleware } from './middlewares/error.middleware';
 import { logger } from './utils/logger';
 
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
 
 server.setConfig((app) => {
   // add body parser
@@ -34,20 +37,37 @@ server.setConfig((app) => {
   app.use(morgan('dev'));
   app.use(helmet());
   app.use(cors());
+  initializeSwagger(app)
 });
 
 server.setErrorConfig((app) => {
   app.use(ErrorFunctionMiddleware)
 })
 
-export let app = server.build();
-// app.listen(PORT, () => {
+function initializeSwagger(app : express.Application) {
+  const options = {
+    swaggerDefinition: {
+      info: {
+        title: 'REST API',
+        version: '1.0.0',
+        description: 'Example docs',
+      },
+    },
+    apis: ['swagger.yaml'],
+  };
 
-//   logger.info(`=================================`);
-//   logger.info(`======= ENV: ${NODE_ENV} =======`);
-//   logger.info(`🚀 App listening on the port ${PORT}`);
-//   logger.info(`=================================`);
-// });
+  const specs = swaggerJSDoc(options);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+}
+
+export let app = server.build();
+app.listen(PORT, () => {
+
+  logger.info(`=================================`);
+  logger.info(`======= ENV: ${NODE_ENV} =======`);
+  logger.info(`🚀 App listening on the port ${PORT}`);
+  logger.info(`=================================`);
+});
 
 
 
