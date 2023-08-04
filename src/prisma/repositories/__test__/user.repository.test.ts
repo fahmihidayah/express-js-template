@@ -10,10 +10,11 @@ function createUserRepository(): UserRepository {
     return new UserRepositoryImpl(prismaMock)
 }
 
-function getSampleUser() : User{
+function getSampleUser(): User {
     return {
         id: 1,
-        name: 'fahmi',
+        first_name: 'fahmi',
+        last_name: "hidayah",
         email: 'fahmi@gmail.com',
         password: "Test@1234",
         created_at: new Date(),
@@ -28,7 +29,9 @@ describe('user repository', () => {
     test("create user success", async () => {
 
         const userDto = {
-            name: "fahmi",
+
+            first_name: 'fahmi',
+            last_name: "hidayah",
             email: "fahmi@gmail.com",
             password: "Test@1234"
         }
@@ -36,11 +39,11 @@ describe('user repository', () => {
         prismaMock.user.create.mockResolvedValue(user)
 
         const newUser = await userRepository?.create(userDto)
-        expect(newUser?.name).equal("fahmi")
+        expect(newUser?.first_name).equal("fahmi")
     })
 
     test('find all users success', async () => {
-        
+
         prismaMock.user.findMany.mockResolvedValue([user])
 
         const result = await userRepository?.findAll();
@@ -67,12 +70,14 @@ describe('user repository', () => {
     test('update all user fields by id success', async () => {
         prismaMock.user.findUnique.mockResolvedValue(user)
         prismaMock.user.update.mockResolvedValue({
-            ... user, email : "fahmi@testmail.com"
+            ...user, email: "fahmi@testmail.com"
         })
         const result = await userRepository.update(user.id, {
-            name : "fahmi",
+
+            first_name: 'fahmi',
+            last_name: "hidayah",
             email: "fahmi@testmail.com",
-            password : "Test123!"
+            password: "Test123!"
         })
 
         expect(result?.email).equal('fahmi@testmail.com')
@@ -81,12 +86,13 @@ describe('user repository', () => {
     test('update single user fields by id success', async () => {
         prismaMock.user.findUnique.mockResolvedValue(user)
         prismaMock.user.update.mockResolvedValue({
-            ... user, email : "abc@testmail.com"
+            ...user, email: "abc@testmail.com"
         })
         const result = await userRepository.update(user?.id!!, {
-            name : null,
-            email : "abc@testmail.com",
-            password : null
+            first_name: null,
+            last_name: null,
+            email: "abc@testmail.com",
+            password: null
         })
 
         expect(result?.email).equal("abc@testmail.com")

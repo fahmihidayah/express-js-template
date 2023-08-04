@@ -11,7 +11,8 @@ import { UserRepositoryImpl } from '../prisma/repositories/user.repository'
 async function getSampleUser(): Promise<User> {
     return {
         id: 1,
-        name: 'fahmi',
+        first_name: 'fahmi',
+        last_name : "hidayah",
         email: 'fahmi@gmail.com',
         password: await hash("Test@1234", 10),
         created_at: new Date(),
@@ -44,7 +45,8 @@ describe('User API test', () => {
 
     test('POST /api/v1/users/register success', async () => {
         const createUserDto: CreateUserDto = {
-            name : "fahmi",
+            first_name : "fahmi",
+            last_name : "hidayah",
             email: 'fahmi@gmail.com',
             password: 'Test@1234',
         };
@@ -66,6 +68,20 @@ describe('User API test', () => {
         token = userWithToken.access_token
 
         return supertest(expressApplication).get('/api/v1/users/profile').set("Authorization", "Bearer " + token).expect(200)
+    })
+
+    test('GET /api/v1/users/:id success', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(await getSampleUser());
+        
+        const userWithToken = await userService.login({
+            email : "fahmi@gmail.com",
+            password : "Test@1234"
+        })
+
+        token = userWithToken.access_token
+
+        return supertest(expressApplication).get('/api/v1/users/profile').set("Authorization", "Bearer " + token).expect(200)
+    
     })
 
 })

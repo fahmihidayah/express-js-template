@@ -5,4 +5,4 @@ todo :
 1. need test production env (done)
 2. test docker compose (done)
 3. integrate docker compose with nginx 
-4. learn about make file 
+4. learn about Makefile

@@ -13,7 +13,9 @@ export class LoginUserDto {
 
 export class CreateUserDto {
     @MinLength(3)
-    public name: string = ""
+    public first_name: string = ""
+    @MinLength(3)
+    public last_name: string = ""
 
     @IsEmail()
     public email: string = "";
@@ -27,7 +29,9 @@ export class CreateUserDto {
 
 export class UpdateUserFormDto {
     
-    public name: string | null = null
+    public first_name: string | null = null
+
+    public last_name: string | null = null
 
     public email: string | null = null;
 
@@ -45,14 +49,16 @@ export class UpdateUserDto {
 
 export interface UserData  {
     id: number | null;
-    name: string | null;
+    first_name: string | null;
+    last_name: string | null;
     email: string | null;
     created_at : Date | null;
     updated_at : Date | null;
 }
 
 export interface UserWithToken {
-    name: string;
+    first_name: string;
+    last_name: string;
     email: string;
     access_token: string;
     refresh_token: string;

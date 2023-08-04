@@ -16,7 +16,8 @@ function createUserService(): UserService {
 async function getSampleUser(id : number = 1): Promise<User> {
     return {
         id: id,
-        name: 'fahmi',
+        first_name: 'fahmi',
+        last_name : "hidayah",
         email: 'fahmi@gmail.com',
         password: await hash("Test@1234", 10),
         created_at: new Date(),
@@ -26,7 +27,8 @@ async function getSampleUser(id : number = 1): Promise<User> {
 
 function getUserDto(): CreateUserDto {
     return {
-        name: "fahmi",
+        first_name: 'fahmi',
+        last_name : "hidayah",
         email: "fahmi@gmail.com",
         password: "Test@1234"
     }

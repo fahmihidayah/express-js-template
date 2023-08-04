@@ -37,6 +37,17 @@ export class UserController extends BaseHttpController {
         })
     }
 
+    @httpGet("/:id", TYPE_MIDDLEWARE.AuthMiddleware)
+    public async userDetail(@request() request : express.Request) {
+        const user = await this._userService.findById(Number(request.params.id));
+        return this.json({
+            message : "User loaded",
+            code : 200, 
+            error : false,
+            data : user
+        })
+    }
+
     @httpPost("/login", TYPE_MIDDLWARE_VALIDATION.LoginValidationMiddleware)
     public async login (@request() request : express.Request) {
         const userDto = {... request.body}
@@ -65,7 +76,8 @@ export class UserController extends BaseHttpController {
     public async getProfile(@request() request : RequestWithUser) {
         const user = {
             id : request.user.id,
-            name : request.user.name,
+            first_name : request.user.first_name,
+            last_name : request.user.last_name,
             email : request.user.email,
             created_at : request.user.created_at,
             updated_at : request.user.updated_at

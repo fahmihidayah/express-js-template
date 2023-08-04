@@ -1,8 +1,8 @@
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto } from "../../dtos/user";
 import { UserRepository } from "../../repositories/user.repository";
 import { inject, injectable } from "inversify";
-import { PrismaClient, User } from "@prisma/client";
 import { TYPE_PRISMA } from "../../modules/prisma.container";
+import { PrismaClient, User } from "@prisma/client";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
@@ -45,8 +45,12 @@ export class UserRepositoryImpl implements UserRepository {
             updatedUserForm.email = userForm.email
         }
         
-        if(userForm.name) {
-            updatedUserForm.name = userForm.name
+        if(userForm.first_name) {
+            updatedUserForm.first_name = userForm.first_name
+        }
+        
+        if(userForm.last_name) {
+            updatedUserForm.last_name = userForm.last_name
         }
 
         if(userForm.password) {
