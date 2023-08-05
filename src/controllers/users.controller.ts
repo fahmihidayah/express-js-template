@@ -28,7 +28,11 @@ export class UserController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        const users : UserData [] = await this._userService.findAll()
+        const {page, take} = this.httpContext.request.query
+        const users : UserData [] = await this._userService.findAll({
+            page : Number(page), 
+            take : Number(take)
+        })
         return this.json({
             message : "Users Loaded",
             code : 200,

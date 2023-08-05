@@ -13,8 +13,10 @@ function getSampleUser(): User {
     return {
         id: 1,
         first_name: 'fahmi',
-        last_name: "hidayah",
+        last_name : "hidayah",
         email: 'fahmi@gmail.com',
+        is_email_verified : false,
+        email_verification_code : "",
         password: "Test@1234",
         created_at: new Date(),
         updated_at: new Date(),
@@ -45,7 +47,7 @@ describe('user repository', () => {
 
         prismaMock.user.findMany.mockResolvedValue([user])
 
-        const result = await userRepository?.findAll();
+        const result = await userRepository?.findAll({page: 1, take : 10});
 
         expect(result.length).equal(1)
     })

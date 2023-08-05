@@ -2,7 +2,7 @@ import { Prisma, PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { TYPE_REPOSITORY } from "../repositories";
+import { TYPE_REPOSITORY, UsersQuery } from "../repositories";
 import { UserRepository } from "../repositories/user.repository";
 import { compare, hash } from 'bcrypt';
 import { HttpException } from "../exceptions/httpException";
@@ -14,7 +14,7 @@ import { createToken, userToUserData, userToUserWithToken } from "../utils/auth.
 export interface UserService {
     login(form: LoginUserDto): Promise<UserWithToken>
     register(form: CreateUserDto): Promise<UserData | unknown>
-    findAll(): Promise<UserData[]>
+    findAll(UsersQuery : UsersQuery): Promise<UserData[]>
     findById(id: number): Promise<UserData | unknown>
 }
 
@@ -29,8 +29,8 @@ export class UserServiceImpl implements UserService {
     public async findById(id: number): Promise<UserData | unknown> {
         return await this._userRepository.findById(id)
     }
-    public async findAll(): Promise<UserData[]> {
-        const users: UserData[] = (await this._userRepository.findAll())
+    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<UserData[]> {
+        const users: UserData[] = (await this._userRepository.findAll(usersQuery))
 
         return users.map<UserData>((user)=> {return userToUserData(user as User)})
     }

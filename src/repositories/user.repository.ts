@@ -10,11 +10,12 @@ export interface UserRepository {
 
     update(id : number, userForm : UpdateUserFormDto) : Promise<User | null>
 
-    findAll() : Promise<User[]>
+    findAll(usersQuery : UsersQuery) : Promise<User[]>
 }
 
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
+import { UsersQuery } from ".";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
@@ -77,8 +78,13 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async findAll(): Promise<User[]> {
-        return await this._prismaClient.user.findMany();
+    async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<User[]> {
+        const {page, take} = usersQuery;
+        const skip : number = (page - 1) * take;
+        return await this._prismaClient.user.findMany({
+            skip : skip, 
+            take : take
+        });
     }
 
 }

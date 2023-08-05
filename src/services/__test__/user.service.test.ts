@@ -16,10 +16,12 @@ function createUserService(): UserService {
 
 async function getSampleUser(id : number = 1): Promise<User> {
     return {
-        id: id,
+        id: 1,
         first_name: 'fahmi',
         last_name : "hidayah",
         email: 'fahmi@gmail.com',
+        is_email_verified : false,
+        email_verification_code : "",
         password: await hash("Test@1234", 10),
         created_at: new Date(),
         updated_at: new Date(),
@@ -64,7 +66,7 @@ describe("User Service", () => {
     it("find all user", async () => {
         prismaMock.user.findMany.mockResolvedValue([await getSampleUser()])
 
-        let users = await userService.findAll();
+        let users = await userService.findAll({page : 1, take: 10});
 
         expect(users.length).equal(1)
     })
