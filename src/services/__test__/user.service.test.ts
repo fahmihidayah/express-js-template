@@ -4,10 +4,11 @@ import { TYPE_SERVICE } from "..";
 import { expect } from 'chai';
 import { LoginUserDto, UserWithToken, CreateUserDto, UserData } from "../../dtos/user";
 import { length } from "class-validator";
-import { UserRepositoryImpl } from "../../prisma/repositories/user.repository";
-import { prismaMock } from "../../prisma/singleton";
 import { User } from ".prisma/client";
 import { hash } from "bcrypt";
+
+import {prismaMock} from "../../../prisma/singleton";
+import { UserRepositoryImpl } from "../../repositories/user.repository";
 
 function createUserService(): UserService {
     return new UserServiceImpl(new UserRepositoryImpl(prismaMock))

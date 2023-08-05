@@ -8,7 +8,7 @@ import { BaseMiddleware } from 'inversify-express-utils';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { injectable } from 'inversify';
-import prisma from '../prisma/client';
+import prisma from '../../prisma/index';
 // import { SECRET_KEY } from '@config';
 // import { HttpException } from '@exceptions/httpException';
 // import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';

@@ -3,7 +3,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
-  setupFilesAfterEnv: ['<rootDir>/src/prisma/singleton.ts'],
+  setupFilesAfterEnv: ['<rootDir>/prisma/singleton.ts'],
   testEnvironmentOptions: {
     verboseQuery: true,
   },

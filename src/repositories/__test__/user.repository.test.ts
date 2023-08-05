@@ -1,9 +1,8 @@
 import "reflect-metadata";
-import { UserRepository } from "../../../repositories/user.repository"
-import { UserRepositoryImpl } from "../user.repository";
+import { UserRepository, UserRepositoryImpl } from "../user.repository"
 import { expect } from "chai";
-import { prismaMock } from "../../singleton";
 import { User } from ".prisma/client";
+import {prismaMock} from "../../../prisma/singleton";
 
 
 function createUserRepository(): UserRepository {

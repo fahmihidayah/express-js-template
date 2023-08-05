@@ -57,9 +57,9 @@ export interface UserData  {
 }
 
 export interface UserWithToken {
-    first_name: string;
-    last_name: string;
-    email: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
     access_token: string;
     refresh_token: string;
     expire_in : number;

@@ -17,15 +17,13 @@ export interface UserService {
     findById(id: number): Promise<UserData | unknown>
 }
 
-export function userToUserData(e : User) : UserData {
-    return {
-        id: e.id,
+export const userToUserData = (e : User) : UserData => {
+    return {id: e.id,
         first_name: e.first_name,
         last_name : e.last_name,
         email: e.email,
         created_at: e.created_at,
-        updated_at: e.updated_at
-    }
+        updated_at: e.updated_at}
 }
 
 export function userToUserWithToken(user : UserData, tokenData : TokenData) : UserWithToken {
@@ -39,7 +37,7 @@ export function userToUserWithToken(user : UserData, tokenData : TokenData) : Us
     }
 }
 
-export function createToken(user: User): TokenData {
+export function createToken(user:User): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string | undefined = SECRET_KEY;
     const expiresIn: number = 60 * 60;
@@ -61,7 +59,7 @@ export class UserServiceImpl implements UserService {
     public async findAll(): Promise<UserData[]> {
         const users: UserData[] = (await this._userRepository.findAll())
 
-        return users.map<UserData>(e => userToUserData(e))
+        return users.map<UserData>((user)=> {return userToUserData(user as User)})
     }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {
@@ -81,6 +79,6 @@ export class UserServiceImpl implements UserService {
         const hashPassword = await hash(form.password, 10)
         const encryptForm = { ...form, password: hashPassword }
         const newUser = await this._userRepository.create(encryptForm)
-        return userToUserData(newUser)
+        return userToUserData(newUser as User)
     }
 }

@@ -20,7 +20,7 @@
     "migrate:test:ci": "DATABASE_URL=\"file:./test.db\" prisma migrate dev"
   },
   "prisma": {
-    "schema": "src/prisma/schema.prisma"
+    "schema": "prisma/schema.prisma"
   },
   "keywords": [],
   "repository": {

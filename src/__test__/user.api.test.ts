@@ -2,10 +2,11 @@ import { User } from '.prisma/client'
 import { CreateUserDto, LoginUserDto } from '../dtos/user'
 import { app as expressApplication } from '../index'
 import supertest from 'supertest'
-import { prismaMock } from '../prisma/singleton'
 import { hash } from 'bcrypt'
 import { UserService, UserServiceImpl } from '../services/user.service'
-import { UserRepositoryImpl } from '../prisma/repositories/user.repository'
+import { UserRepositoryImpl } from '../repositories/user.repository'
+import { prismaMock } from '../../prisma/singleton'
+
 
 
 async function getSampleUser(): Promise<User> {
@@ -47,12 +48,11 @@ describe('User API test', () => {
         const createUserDto: CreateUserDto = {
             first_name : "fahmi",
             last_name : "hidayah",
-            email: 'fahmi@gmail.com',
+            email: 'fahmi1@gmail.com',
             password: 'Test@1234',
         };
 
-        prismaMock.user.findUnique.mockResolvedValue(await getSampleUser())
-
+        prismaMock.user.create.mockResolvedValue(await getSampleUser())
         return supertest(expressApplication).post('/api/v1/users/register').send(createUserDto).expect(200)
     })
 
@@ -80,7 +80,7 @@ describe('User API test', () => {
 
         token = userWithToken.access_token
 
-        return supertest(expressApplication).get('/api/v1/users/profile').set("Authorization", "Bearer " + token).expect(200)
+        return supertest(expressApplication).get('/api/v1/users/' + 1).set("Authorization", "Bearer " + token).expect(200)
     
     })
 

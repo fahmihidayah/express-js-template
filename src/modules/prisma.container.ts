@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient, User } from "@prisma/client";
 import { Container, ContainerModule, interfaces } from "inversify";
-import prisma from "../prisma/client";
+import prisma from "../../prisma/index";
 
 export const TYPE_PRISMA = {
     PrismaClient: Symbol.for("PrismaClient")
