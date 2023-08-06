@@ -10,11 +10,14 @@ import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
 import { SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
 import { createToken, userToUserData, userToUserWithToken } from "../utils/auth.utils";
+import { GetResult } from "@prisma/client/runtime/library";
+import { PaginateList } from "../dtos";
 
 export interface UserService {
+    verify(code : string) : Promise<User | unknown>
     login(form: LoginUserDto): Promise<UserWithToken>
     register(form: CreateUserDto): Promise<UserData | unknown>
-    findAll(UsersQuery : UsersQuery): Promise<UserData[]>
+    findAll(UsersQuery : UsersQuery): Promise<PaginateList<UserData[]>>
     findById(id: number): Promise<UserData | unknown>
 }
 
@@ -26,13 +29,25 @@ export class UserServiceImpl implements UserService {
     ) {
 
     }
+
+    public async verify(code: string): Promise<User| unknown> {
+       const user : User | null = await this._userRepository.findByVerifyCode(code);
+       console.log(user)
+       if(user !== null) {
+            return await this._userRepository.verifyUser(user);
+       }
+    }
+
     public async findById(id: number): Promise<UserData | unknown> {
         return await this._userRepository.findById(id)
     }
-    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<UserData[]> {
-        const users: UserData[] = (await this._userRepository.findAll(usersQuery))
-
-        return users.map<UserData>((user)=> {return userToUserData(user as User)})
+    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<PaginateList<UserData[]>> {
+        const users = await this._userRepository.findAll(usersQuery)
+        return {
+            page : users.page,
+            total : users.total,
+            data : users.data.map<UserData>((user)=> {return userToUserData(user as User)})
+        }
     }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {

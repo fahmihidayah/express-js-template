@@ -2,6 +2,11 @@ import { PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
 
 export interface UserRepository {
+
+    findByVerifyCode(code : string) : Promise<User | null>
+
+    verifyUser(user : User | null) : Promise<User | null>
+
     create(user : CreateUserDto) : Promise<User | null>
     
     findByEmail(email : string) : Promise<User | null>
@@ -10,12 +15,16 @@ export interface UserRepository {
 
     update(id : number, userForm : UpdateUserFormDto) : Promise<User | null>
 
-    findAll(usersQuery : UsersQuery) : Promise<User[]>
+    findAll(usersQuery : UsersQuery) : Promise<PaginateList<User[]>>
+
+    count() : Promise<number>
 }
 
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { UsersQuery } from ".";
+import { GetResult } from "@prisma/client/runtime/library";
+import { PaginateList } from "../dtos";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
@@ -24,6 +33,30 @@ export class UserRepositoryImpl implements UserRepository {
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient
     ) {
 
+    }
+    async count(): Promise<number> {
+        return await this._prismaClient.user.count();
+    }
+
+
+    async verifyUser(user: User | null): Promise<User | null> {
+        
+        return await this._prismaClient.user.update({
+            data : {
+                is_email_verified : true,
+            },
+            where : {
+                id : (user as User).id
+            }
+        })
+    }
+    async findByVerifyCode(code: string): Promise<User | null> {
+        return await this._prismaClient.user.findFirst({
+            where : {
+                email_verification_code : code,
+                is_email_verified : false
+            }
+        })
     }
 
     async findById(id: number): Promise<User | null> {
@@ -78,13 +111,21 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<User[]> {
+    async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<PaginateList<User[]>> {
         const {page, take} = usersQuery;
         const skip : number = (page - 1) * take;
-        return await this._prismaClient.user.findMany({
+        const count : number =  await this.count();
+        const total : number = Math.ceil(count / take)
+        const data : Array<User> = await this._prismaClient.user.findMany({
             skip : skip, 
             take : take
-        });
+        })
+
+        return {
+            page : page ,
+            total : total,
+            data : data
+        };
     }
 
 }

@@ -16,7 +16,7 @@ async function getSampleUser(): Promise<User> {
         last_name : "hidayah",
         email: 'fahmi@gmail.com',
         is_email_verified : false,
-        email_verification_code : "",
+        email_verification_code : "654321",
         password: await hash("Test@1234", 10),
         created_at: new Date(),
         updated_at: new Date(),
@@ -31,7 +31,7 @@ describe('User API test', () => {
     let token : string = ""
 
     beforeAll(async () => {
-        prismaMock.user.findUnique.mockResolvedValue(await getSampleUser())
+        // prismaMock.user.findUnique.mockResolvedValue(await getSampleUser())
        
     })
 
@@ -85,5 +85,14 @@ describe('User API test', () => {
         return supertest(expressApplication).get('/api/v1/users/' + 1).set("Authorization", "Bearer " + token).expect(200)
     
     })
+
+    test('GET /api/v1/users/verify/:code', async () => {
+        prismaMock.user.findFirst.mockResolvedValue(await getSampleUser());
+
+        prismaMock.user.update.mockResolvedValue(await getSampleUser());
+        
+        return supertest(expressApplication).get("/api/v1/users/verify/123456").expect(200);
+    })
+
 
 })

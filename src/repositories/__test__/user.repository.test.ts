@@ -16,7 +16,7 @@ function getSampleUser(): User {
         last_name : "hidayah",
         email: 'fahmi@gmail.com',
         is_email_verified : false,
-        email_verification_code : "",
+        email_verification_code : `123456789`,
         password: "Test@1234",
         created_at: new Date(),
         updated_at: new Date(),
@@ -49,7 +49,7 @@ describe('user repository', () => {
 
         const result = await userRepository?.findAll({page: 1, take : 10});
 
-        expect(result.length).equal(1)
+        expect(result.data.length).equal(1)
     })
 
     test('find user by id', async () => {
@@ -98,4 +98,21 @@ describe('user repository', () => {
 
         expect(result?.email).equal("abc@testmail.com")
     })
+
+    test('findByVerifyCode failure', async () => {
+        // prismaMock.user.findFirst.mockResolvedValue(user)
+       
+        const result = await userRepository.findByVerifyCode("987654321")
+
+        expect(result).equal(undefined)
+    })
+
+    test('findByVerifyVode success', async () => {
+        prismaMock.user.findFirst.mockResolvedValue(user)
+       
+        const result = await userRepository.findByVerifyCode("123456789")
+
+        expect(result?.id).equal(1)
+    })
+
 })

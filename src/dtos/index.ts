@@ -9,3 +9,9 @@ export interface PaginateResponse<T> extends BaseResponse<T> {
     page : number;
     total : number;
 }
+
+export interface PaginateList<T>  {
+    page : number;
+    total : number;
+    data : T
+}

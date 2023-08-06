@@ -15,6 +15,7 @@ import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.modu
 import { ValidationMiddleware } from "../middlewares/validation";
 import { TYPE_MIDDLEWARE } from "../middlewares";
 import { RequestWithUser } from "../interfaces/auth.interfaces";
+import { PaginateList } from "../dtos";
 
 
 @controller("/users")
@@ -28,8 +29,14 @@ export class UserController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        const {page, take} = this.httpContext.request.query
-        const users : UserData [] = await this._userService.findAll({
+        let {page, take} = this.httpContext.request.query
+        if(!page) {
+            page = "1";
+        }
+        if(!take) {
+            take = "10";
+        }
+        const users : PaginateList<UserData[]> = await this._userService.findAll({
             page : Number(page), 
             take : Number(take)
         })
@@ -37,8 +44,30 @@ export class UserController extends BaseHttpController {
             message : "Users Loaded",
             code : 200,
             error : false,
-            data : users
+            ... users
         })
+    }
+
+    @httpGet("/verify/:code")
+    public async verifiedUser() { 
+        const verifyCode = this.httpContext.request.params.code;
+
+        const user = await this._userService.verify(verifyCode);
+        if(user) {
+            return this.json({
+                message : "User verified",
+                code : 200,
+                error : false,
+                data : user
+            })
+        }
+        else {
+            return this.json({
+                message : "User not found",
+                code : 400,
+                error : false,
+                data : user}, 400)
+        }
     }
 
     @httpGet("/:id", TYPE_MIDDLEWARE.AuthMiddleware)
