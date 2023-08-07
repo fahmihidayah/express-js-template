@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { UserData, UserWithToken } from "../dtos/user";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
-import { SECRET_KEY } from "../config";
+import { REFRESH_SECRET_KEY, SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
 
 
@@ -20,16 +20,18 @@ export function userToUserWithToken(user : UserData, tokenData : TokenData) : Us
         first_name: user.first_name,
         last_name : user.last_name,
         email: user.email,
-        access_token: tokenData.token,
-        refresh_token: "",
-        expire_in: tokenData.expiresIn
+        ... tokenData
     }
 }
 
 export function createToken(user:User): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string | undefined = SECRET_KEY;
-    const expiresIn: number = 60 * 60;
+    const refreshKey: string | undefined = REFRESH_SECRET_KEY;
+    const expires_in: number = 60 * 60;
 
-    return { expiresIn, token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn }) };
+    return { expire_in : expires_in, 
+        access_token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : "14m" }),
+        refresh_token : sign(dataStoredInToken, refreshKey ?? "refresh-1234", { expiresIn : "30d" }  )
+    };
 }

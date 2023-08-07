@@ -1,5 +1,10 @@
 import { PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
+import { inject, injectable } from "inversify";
+import { TYPE_PRISMA } from "../modules/prisma.container";
+import { UsersQuery } from ".";
+import { GetResult } from "@prisma/client/runtime/library";
+import { PaginateList } from "../dtos";
 
 export interface UserRepository {
 
@@ -20,11 +25,6 @@ export interface UserRepository {
     count() : Promise<number>
 }
 
-import { inject, injectable } from "inversify";
-import { TYPE_PRISMA } from "../modules/prisma.container";
-import { UsersQuery } from ".";
-import { GetResult } from "@prisma/client/runtime/library";
-import { PaginateList } from "../dtos";
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {

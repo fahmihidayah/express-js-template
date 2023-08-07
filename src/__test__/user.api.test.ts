@@ -16,6 +16,7 @@ async function getSampleUser(): Promise<User> {
         last_name : "hidayah",
         email: 'fahmi@gmail.com',
         is_email_verified : false,
+        is_admin : false,
         email_verification_code : "654321",
         password: await hash("Test@1234", 10),
         created_at: new Date(),

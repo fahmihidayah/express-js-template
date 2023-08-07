@@ -1,10 +1,11 @@
 export const TYPE_REPOSITORY = {
-    UserRepository: Symbol.for("UserRepository")
+    UserRepository: Symbol.for("UserRepository"),
+    UserTokenRepository: Symbol.for("UserTokenRepository")
 }
 
 export interface PaginateQuery {
-    page : string;
-    take : string;
+    page : number;
+    take : number
 }
 
 export interface UsersQuery extends PaginateQuery{
