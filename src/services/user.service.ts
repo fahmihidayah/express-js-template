@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
@@ -13,6 +13,7 @@ import { createToken, userToUserData, userToUserWithToken } from "../utils/auth.
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
+import { UserTokenRepository } from "../repositories/userToken.repository";
 
 export interface UserService {
     verify(code : string) : Promise<UserData | unknown>
@@ -20,15 +21,22 @@ export interface UserService {
     register(form: CreateUserDto): Promise<UserData | unknown>
     findAll(UsersQuery : UsersQuery): Promise<PaginateList<UserData[]>>
     findById(id: number): Promise<UserData | unknown>
+    refreshToken(token : string) : Promise<UserWithToken | unknown>
 }
 
 @injectable()
 export class UserServiceImpl implements UserService {
 
     constructor(
-        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository: UserRepository
+        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository: UserRepository,
+        @inject(TYPE_REPOSITORY.UserTokenRepository) private _userTokenRepository : UserTokenRepository,
     ) {
 
+    }
+
+    public async refreshToken(token: string): Promise<UserWithToken | unknown> {
+        // TODO wrong implementation
+        return this._userTokenRepository.findByToken(token)
     }
 
     public async verify(code: string): Promise<User| unknown> {
@@ -60,6 +68,7 @@ export class UserServiceImpl implements UserService {
 
         const tokenData = await createToken(user);
         // const cookie = this.createCookie(tokenData);
+        this._userTokenRepository.findByToken
         
         return userToUserWithToken(user, tokenData);
     }
@@ -70,4 +79,6 @@ export class UserServiceImpl implements UserService {
         const newUser = await this._userRepository.create(encryptForm)
         return userToUserData(newUser as User)
     }
+
+
 }

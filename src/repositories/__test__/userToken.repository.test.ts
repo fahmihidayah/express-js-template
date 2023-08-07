@@ -35,6 +35,11 @@ function createUserTokenRepository(): UserTokenRepository {
 describe('User Token Repository', () => {
     let userTokenRepository : UserTokenRepository = createUserTokenRepository();
     
+    test('craete user token success', async () => {
+        prismaMock.userToken.create.mockResolvedValue(getUserToken());
+        const result = await userTokenRepository.createToken(getSampleUser(), "123456789");
+        expect(result).not.toBeNull();
+    });
 
     test('findUserToken By token success', async () =>{
 

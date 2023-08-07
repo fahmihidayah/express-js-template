@@ -9,9 +9,10 @@ import { hash } from "bcrypt";
 
 import {prismaMock} from "../../../prisma/singleton";
 import { UserRepositoryImpl } from "../../repositories/user.repository";
+import { UserTokenRepositoryImpl } from "../../repositories/userToken.repository";
 
 function createUserService(): UserService {
-    return new UserServiceImpl(new UserRepositoryImpl(prismaMock))
+    return new UserServiceImpl(new UserRepositoryImpl(prismaMock), new UserTokenRepositoryImpl(prismaMock))
 }
 
 async function getSampleUser(id : number = 1): Promise<User> {

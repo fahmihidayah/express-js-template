@@ -6,6 +6,7 @@ import { hash } from 'bcrypt'
 import { UserService, UserServiceImpl } from '../services/user.service'
 import { UserRepositoryImpl } from '../repositories/user.repository'
 import { prismaMock } from '../../prisma/singleton'
+import { UserTokenRepositoryImpl } from '../repositories/userToken.repository'
 
 
 
@@ -27,7 +28,7 @@ async function getSampleUser(): Promise<User> {
 
 describe('User API test', () => {
 
-    const userService : UserService = new UserServiceImpl(new UserRepositoryImpl(prismaMock));
+    const userService : UserService = new UserServiceImpl(new UserRepositoryImpl(prismaMock), new UserTokenRepositoryImpl(prismaMock));
 
     let token : string = ""
 
