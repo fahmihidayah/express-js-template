@@ -32,7 +32,7 @@ export class UserController extends BaseHttpController {
         let {page, take} = this.httpContext.request.query
         const users : PaginateList<UserData[]> = await this._userService.findAll({
             page : Number(page??"1"), 
-            take : Number(take??"10")
+            take : Number(take??"5")
         })
         return this.json({
             message : "Users Loaded",

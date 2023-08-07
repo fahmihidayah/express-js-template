@@ -15,7 +15,7 @@ import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
 
 export interface UserService {
-    verify(code : string) : Promise<User | unknown>
+    verify(code : string) : Promise<UserData | unknown>
     login(form: LoginUserDto): Promise<UserWithToken>
     register(form: CreateUserDto): Promise<UserData | unknown>
     findAll(UsersQuery : UsersQuery): Promise<PaginateList<UserData[]>>
@@ -34,7 +34,8 @@ export class UserServiceImpl implements UserService {
     public async verify(code: string): Promise<User| unknown> {
        const user : User | null = await this._userRepository.findByVerifyCode(code);
        if(user !== null) {
-            return await this._userRepository.verifyUser(user);
+            const updateUser = await this._userRepository.verifyUser(user)
+            return userToUserData(updateUser as User);
        }
     }
 
