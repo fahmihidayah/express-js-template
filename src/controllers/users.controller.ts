@@ -87,6 +87,18 @@ export class UserController extends BaseHttpController {
         })
     }
 
+    @httpPost("/register/admin", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
+    public async registerAdmin(@request() request : express.Request) {
+        const userDto = {... request.body, is_admin : true}
+        const user = await this._userService.register(userDto)
+        return this.json({
+            message : "Register Success",
+            code : 200,
+            error : false,
+            data : user
+        })
+    }
+
     @httpPost("/register", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
     public async register(@request() request : express.Request) {
         const userDto = {... request.body}

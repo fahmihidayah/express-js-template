@@ -16,7 +16,8 @@ model User {
   last_name               String
   email                   String   @unique
   is_email_verified       Boolean  @default(false)
-  email_verification_code String @default("")
+  email_verification_code String   @default("")
+  is_admin                Boolean  @default(false)
   password                String
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt

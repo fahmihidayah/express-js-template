@@ -3,8 +3,8 @@ export const TYPE_REPOSITORY = {
 }
 
 export interface PaginateQuery {
-    page : number;
-    take : number;
+    page : string;
+    take : string;
 }
 
 export interface UsersQuery extends PaginateQuery{
