@@ -51,6 +51,7 @@ export interface UserData  {
     id: number | null;
     first_name: string | null;
     last_name: string | null;
+    is_email_verified : boolean | false;
     email: string | null;
     created_at : Date | null;
     updated_at : Date | null;

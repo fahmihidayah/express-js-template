@@ -10,6 +10,7 @@ export const userToUserData = (e : User) : UserData => {
         first_name: e.first_name,
         last_name : e.last_name,
         email: e.email,
+        is_email_verified : e.is_email_verified,
         created_at: e.created_at,
         updated_at: e.updated_at}
 }
