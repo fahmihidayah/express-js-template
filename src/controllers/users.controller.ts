@@ -30,15 +30,9 @@ export class UserController extends BaseHttpController {
     @httpGet("/")
     public async index() {
         let {page, take} = this.httpContext.request.query
-        if(!page) {
-            page = "1";
-        }
-        if(!take) {
-            take = "10";
-        }
         const users : PaginateList<UserData[]> = await this._userService.findAll({
-            page : Number(page), 
-            take : Number(take)
+            page : Number(page??"1"), 
+            take : Number(take??"10")
         })
         return this.json({
             message : "Users Loaded",

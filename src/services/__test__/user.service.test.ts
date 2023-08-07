@@ -68,7 +68,7 @@ describe("User Service", () => {
 
         let users = await userService.findAll({page : 1, take: 10});
 
-        expect(users.length).equal(1)
+        expect(users.data.length).equal(1)
     })
 
     it('find user by id', async () => {

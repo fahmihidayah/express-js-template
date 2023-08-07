@@ -12,6 +12,7 @@ import { sign } from "jsonwebtoken";
 import { createToken, userToUserData, userToUserWithToken } from "../utils/auth.utils";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
+import { createRandomNumber } from "../utils/string.utils";
 
 export interface UserService {
     verify(code : string) : Promise<User | unknown>
@@ -32,7 +33,6 @@ export class UserServiceImpl implements UserService {
 
     public async verify(code: string): Promise<User| unknown> {
        const user : User | null = await this._userRepository.findByVerifyCode(code);
-       console.log(user)
        if(user !== null) {
             return await this._userRepository.verifyUser(user);
        }
@@ -65,7 +65,7 @@ export class UserServiceImpl implements UserService {
 
     public async register(form: CreateUserDto): Promise<UserData | unknown> {
         const hashPassword = await hash(form.password, 10)
-        const encryptForm = { ...form, password: hashPassword }
+        const encryptForm = { ...form, password: hashPassword, email_verification_code : createRandomNumber() }
         const newUser = await this._userRepository.create(encryptForm)
         return userToUserData(newUser as User)
     }
