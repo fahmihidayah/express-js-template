@@ -6,11 +6,13 @@ import { ErrorMiddleware } from "../middlewares/error.middleware";
 import { TYPE_MIDDLEWARE } from "../middlewares";
 import { ValidationMiddleware } from "../middlewares/validation";
 import { CreateUserDto, LoginUserDto, RefreshTokenDto } from "../dtos/user";
+import { RoleDto } from "../dtos/role";
 
 export const TYPE_MIDDLWARE_VALIDATION = {
     LoginValidationMiddleware : Symbol.for("LoginValidationMiddleware"),
     RegisterValidationMiddleware : Symbol.for("RegisterValidationMiddleware"),
     RefreshTokenValidationMiddleware : Symbol.for("RefreshTokenValidationMiddleware"),
+    RoleValidationMiddleware : Symbol.for("RoleValidationMiddleware"),
   }
 
 export const validationMiddlewareContainerModule = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {
@@ -20,4 +22,7 @@ export const validationMiddlewareContainerModule = new ContainerModule((bind: in
         .toConstantValue(new ValidationMiddleware(CreateUserDto))
     bind<ValidationMiddleware>(TYPE_MIDDLWARE_VALIDATION.RefreshTokenValidationMiddleware)
         .toConstantValue(new ValidationMiddleware(RefreshTokenDto))
+
+    bind<ValidationMiddleware>(TYPE_MIDDLWARE_VALIDATION.RoleValidationMiddleware)
+    .toConstantValue(new ValidationMiddleware(RoleDto))
 });
