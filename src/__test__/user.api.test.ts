@@ -1,5 +1,5 @@
-import { User } from '.prisma/client'
-import { CreateUserDto, LoginUserDto } from '../dtos/user'
+import { User, UserToken } from '.prisma/client'
+import { CreateUserDto, LoginUserDto, RefreshTokenDto } from '../dtos/user'
 import { app as expressApplication } from '../index'
 import supertest from 'supertest'
 import { hash } from 'bcrypt'
@@ -25,6 +25,15 @@ async function getSampleUser(): Promise<User> {
     }
 }
 
+async function getUserToken() : Promise<UserToken> {
+    return {
+        id : 1,
+        user_id : 1,
+        token : "123456789",
+        created_at : new Date(),
+        updated_at : new Date(),
+    }
+}
 
 describe('User API test', () => {
 
@@ -96,5 +105,12 @@ describe('User API test', () => {
         return supertest(expressApplication).get("/api/v1/users/verify/123456").expect(200);
     })
 
+    test("POST /api/v1/users/refreshToken", async () => {
+        const refreshTokenDto: RefreshTokenDto = {
+            refreshToken : "123456789"
+        };
+        prismaMock.userToken.findFirst.mockResolvedValue(await getUserToken());
+        return supertest(expressApplication).post("/api/v1/users/refreshToken").send(refreshTokenDto).expect(200);
+    })
 
 })

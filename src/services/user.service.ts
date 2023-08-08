@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
-import { CreateUserDto, LoginUserDto, UserData, UserWithToken } from "../dtos/user";
+import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { TYPE_REPOSITORY, UsersQuery } from "../repositories";
@@ -9,7 +9,7 @@ import { HttpException } from "../exceptions/httpException";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
 import { SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
-import { createToken, userToUserData, userToUserWithToken } from "../utils/auth.utils";
+import { createToken, renewToken, userToUserData, userToUserWithToken } from "../utils/auth.utils";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
@@ -21,7 +21,7 @@ export interface UserService {
     register(form: CreateUserDto): Promise<UserData | unknown>
     findAll(UsersQuery : UsersQuery): Promise<PaginateList<UserData[]>>
     findById(id: number): Promise<UserData | unknown>
-    refreshToken(token : string) : Promise<UserWithToken | unknown>
+    refreshToken(refreshTokenDto : RefreshTokenDto) : Promise<string | null>
 }
 
 @injectable()
@@ -34,9 +34,14 @@ export class UserServiceImpl implements UserService {
 
     }
 
-    public async refreshToken(token: string): Promise<UserWithToken | unknown> {
-        // TODO wrong implementation
-        return this._userTokenRepository.findByToken(token)
+    public async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null> {
+        const userToken = await this._userTokenRepository.findByToken(refreshTokenDto.refreshToken) 
+        if(userToken !== null) {
+            return renewToken(userToken?.id)
+        }
+        else {
+            return null
+        }
     }
 
     public async verify(code: string): Promise<User| unknown> {
@@ -68,8 +73,13 @@ export class UserServiceImpl implements UserService {
 
         const tokenData = await createToken(user);
         // const cookie = this.createCookie(tokenData);
-        this._userTokenRepository.findByToken
-        
+        const userToken = await this._userTokenRepository.findByUser(user);
+        if(userToken === null) {
+            await this._userTokenRepository.createToken(user, tokenData.refresh_token);
+        }
+        else {
+            await this._userTokenRepository.updateToken(user, tokenData.refresh_token);
+        }
         return userToUserWithToken(user, tokenData);
     }
 

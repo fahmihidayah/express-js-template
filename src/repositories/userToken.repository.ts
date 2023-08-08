@@ -6,6 +6,8 @@ import { GetResult } from "@prisma/client/runtime/library";
 export interface UserTokenRepository {
     findByToken(token : string) : Promise<UserToken | null>
     createToken(user : User, token : string) : Promise<UserToken | null>
+    findByUser(user : User | null) : Promise<UserToken | null>
+    updateToken(user : User, token : string) : Promise<UserToken | null>
 
 }
 
@@ -16,6 +18,23 @@ export class UserTokenRepositoryImpl implements UserTokenRepository {
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient
     ) {
 
+    }
+    public async updateToken(user:User, token: string): Promise<UserToken | null> {
+        return await this._prismaClient.userToken.update({
+            where : {
+                user_id : user.id
+            },
+            data : {
+                token : token
+            }
+        })
+    }
+    public async findByUser(user: User): Promise<UserToken | null> {
+        return await this._prismaClient.userToken.findFirst({
+            where : {
+                user_id : user.id
+            }
+        })
     }
     public async createToken(user: User, token: string): Promise<UserToken | null> {
         return await this._prismaClient.userToken.create({

@@ -32,6 +32,12 @@ export function createToken(user:User): TokenData {
 
     return { expire_in : expires_in, 
         access_token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : "14m" }),
-        refresh_token : sign(dataStoredInToken, refreshKey ?? "refresh-1234", { expiresIn : "30d" }  )
+        refresh_token : sign(dataStoredInToken, refreshKey ?? "refresh-1234", { expiresIn : "30d" } )
     };
+}
+
+export function renewToken(id : number) : string {
+    const dataStoredInToken: DataStoredInToken = { id: id };
+    const secretKey: string | undefined = SECRET_KEY;
+    return sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : "14m" });
 }

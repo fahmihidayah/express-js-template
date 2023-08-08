@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, isNotEmpty } from 'class-validator';
 
 export class LoginUserDto {
     @IsEmail()
@@ -9,6 +9,11 @@ export class LoginUserDto {
     @MinLength(8)
     @MaxLength(32)
     public password: string = "";
+}
+
+export class RefreshTokenDto {
+    @IsNotEmpty()
+    public refreshToken : string = "";
 }
 
 export class CreateUserDto {
@@ -64,4 +69,8 @@ export interface UserWithToken {
     access_token: string;
     refresh_token: string;
     expire_in : number;
+}
+
+export interface RefreshToken {
+    token : string
 }

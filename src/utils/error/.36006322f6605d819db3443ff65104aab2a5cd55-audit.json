@@ -34,6 +34,11 @@
             "date": 1691374539241,
             "name": "/Users/s/Documents/NodeJs/express-clean/blog-api/src/utils/error/2023-08-07.log",
             "hash": "53045805ca5f7c95670608abf9a42c9d61dc873911ee21d2d95f744269289379"
+        },
+        {
+            "date": 1691462924409,
+            "name": "/Users/s/Documents/NodeJs/express-clean/blog-api/src/utils/error/2023-08-08.log",
+            "hash": "c5177a41b1b821e2663c79112a028ba824ac0ea81cdfab3e7a1a0c02f191d455"
         }
     ],
     "hashType": "sha256"

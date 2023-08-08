@@ -87,6 +87,30 @@ export class UserController extends BaseHttpController {
         })
     }
 
+    @httpPost("/refreshToken", TYPE_MIDDLWARE_VALIDATION.RefreshTokenValidationMiddleware)
+    public async refreshToken() {
+        const refreshToken = {... this.httpContext.request.body}
+        const token = await this._userService.refreshToken(refreshToken)
+        if(token !== null) {
+            return this.json({
+                message : "Token refresh",
+                code : 200,
+                error : false,
+                data : {
+                    token : token
+                }
+            })
+        }
+        else {
+            return this.json({
+                message : "Token invalid",
+                code : 400,
+                error : true
+            }, 400)
+        }
+        
+    }
+
     @httpPost("/register/admin", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
     public async registerAdmin(@request() request : express.Request) {
         const userDto = {... request.body, is_admin : true}

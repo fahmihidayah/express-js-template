@@ -4,7 +4,7 @@ import { TYPE_SERVICE } from "..";
 import { expect } from 'chai';
 import { LoginUserDto, UserWithToken, CreateUserDto, UserData } from "../../dtos/user";
 import { length } from "class-validator";
-import { User } from ".prisma/client";
+import { User, UserToken } from ".prisma/client";
 import { hash } from "bcrypt";
 
 import {prismaMock} from "../../../prisma/singleton";
@@ -27,6 +27,16 @@ async function getSampleUser(id : number = 1): Promise<User> {
         password: await hash("Test@1234", 10),
         created_at: new Date(),
         updated_at: new Date(),
+    }
+}
+
+async function getUserToken() : Promise<UserToken> {
+    return {
+        id : 1,
+        user_id : 1,
+        token : "123456789",
+        created_at : new Date(),
+        updated_at : new Date(),
     }
 }
 
@@ -59,6 +69,7 @@ describe("User Service", () => {
 
     test('login user success', async() => {
         prismaMock.user.findUnique.mockResolvedValue(await getSampleUser())
+        prismaMock.userToken.create.mockResolvedValue(await getUserToken());
 
         let userWithToken = await userService.login(getLoginUserDto());
 
@@ -79,6 +90,14 @@ describe("User Service", () => {
         let user = await userService.findById(1) as User;
 
         expect(user.email).equal("fahmi@gmail.com")
+    })
+
+    it('refresh token success', async () => {
+        prismaMock.userToken.findFirst.mockResolvedValue(await getUserToken());
+        let token = await userService.refreshToken({
+            refreshToken : "123456789"
+        });
+        expect(token).not.null;
     })
 })
 
