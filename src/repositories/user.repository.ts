@@ -8,21 +8,21 @@ import { PaginateList } from "../dtos";
 
 export interface UserRepository {
 
-    findByVerifyCode(code : string) : Promise<User | null>
+    findByVerifyCode(code: string): Promise<User | null>
 
-    verifyUser(user : User | null) : Promise<User | null>
+    verifyUser(user: User | null): Promise<User | null>
 
-    create(user : CreateUserDto) : Promise<User | null>
-    
-    findByEmail(email : string) : Promise<User | null>
+    create(user: CreateUserDto): Promise<User | null>
 
-    findById(id : number) : Promise<User | null>
+    findByEmail(email: string): Promise<User | null>
 
-    update(id : number, userForm : UpdateUserFormDto) : Promise<User | null>
+    findById(id: number): Promise<User | null>
 
-    findAll(usersQuery : UsersQuery) : Promise<PaginateList<User[]>>
+    update(id: number, userForm: UpdateUserFormDto): Promise<User | null>
 
-    count() : Promise<number>
+    findAll(usersQuery: UsersQuery): Promise<PaginateList<User[]>>
+
+    count(): Promise<number>
 }
 
 
@@ -40,21 +40,21 @@ export class UserRepositoryImpl implements UserRepository {
 
 
     async verifyUser(user: User | null): Promise<User | null> {
-        
+
         return await this._prismaClient.user.update({
-            data : {
-                is_email_verified : true,
+            data: {
+                is_email_verified: true,
             },
-            where : {
-                id : (user as User).id
+            where: {
+                id: (user as User).id
             }
         })
     }
     async findByVerifyCode(code: string): Promise<User | null> {
         return await this._prismaClient.user.findFirst({
-            where : {
-                email_verification_code : code,
-                is_email_verified : false
+            where: {
+                email_verification_code: code,
+                is_email_verified: false
             }
         })
     }
@@ -84,22 +84,22 @@ export class UserRepositoryImpl implements UserRepository {
     async update(id: number, userForm: UpdateUserFormDto): Promise<User | null> {
         let user = await this.findById(id)
         let updatedUserForm = {
-            ... user
+            ...user
         }
 
-        if(userForm.email) {
+        if (userForm.email) {
             updatedUserForm.email = userForm.email
         }
-        
-        if(userForm.first_name) {
+
+        if (userForm.first_name) {
             updatedUserForm.first_name = userForm.first_name
         }
-        
-        if(userForm.last_name) {
+
+        if (userForm.last_name) {
             updatedUserForm.last_name = userForm.last_name
         }
 
-        if(userForm.password) {
+        if (userForm.password) {
             updatedUserForm.password = userForm.password
         }
 
@@ -111,20 +111,39 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<PaginateList<User[]>> {
-        const {page, take} = usersQuery;
-        const skip : number = (page - 1) * take;
-        const count : number =  await this.count();
-        const total : number = Math.ceil(count / take)
-        const data : Array<User> = await this._prismaClient.user.findMany({
-            skip : skip, 
-            take : take
+    async findAll(usersQuery: UsersQuery = { page: 1, take: 10, keyword: "" }): Promise<PaginateList<User[]>> {
+        const { page, take } = usersQuery;
+        const skip: number = (page - 1) * take;
+        const count: number = await this.count();
+        const total: number = Math.ceil(count / take)
+        const data: Array<User> = await this._prismaClient.user.findMany({
+            skip: skip,
+            take: take,
+            where: {
+                OR: [
+                    {
+                        email: {
+                            contains: usersQuery.keyword
+                        }
+                    },
+                    {
+                        first_name: {
+                            contains: usersQuery.keyword
+                        }
+                    },
+                    {
+                        last_name: {
+                            contains: usersQuery.keyword
+                        }
+                    }
+                ]
+            }
         })
 
         return {
-            page : page ,
-            total : total,
-            data : data
+            page: page,
+            total: total,
+            data: data
         };
     }
 

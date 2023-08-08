@@ -79,7 +79,7 @@ describe("User Service", () => {
     it("find all user", async () => {
         prismaMock.user.findMany.mockResolvedValue([await getSampleUser()])
 
-        let users = await userService.findAll({page : 1, take: 10});
+        let users = await userService.findAll({page : 1, take: 10, keyword : ""});
 
         expect(users.data.length).equal(1)
     })

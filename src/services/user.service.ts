@@ -55,7 +55,7 @@ export class UserServiceImpl implements UserService {
     public async findById(id: number): Promise<UserData | unknown> {
         return await this._userRepository.findById(id)
     }
-    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10}): Promise<PaginateList<UserData[]>> {
+    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10, keyword : ""}): Promise<PaginateList<UserData[]>> {
         const users = await this._userRepository.findAll(usersQuery)
         return {
             page : users.page,
