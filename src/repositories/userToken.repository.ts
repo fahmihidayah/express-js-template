@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { PrismaClient, User, UserToken } from "@prisma/client";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";

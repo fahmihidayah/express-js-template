@@ -5,5 +5,5 @@ import { RoleService, RoleServiceImpl } from "../services/role.service";
 
 export const serviceContainerModule = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {
     bind<UserService>(TYPE_SERVICE.UserService).to(UserServiceImpl);
-    bind<RoleService>(TYPE_SERVICE.UserService).to(RoleServiceImpl);
+    bind<RoleService>(TYPE_SERVICE.RoleService).to(RoleServiceImpl);
 })

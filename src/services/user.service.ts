@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";

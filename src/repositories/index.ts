@@ -1,6 +1,7 @@
 export const TYPE_REPOSITORY = {
     UserRepository: Symbol.for("UserRepository"),
-    UserTokenRepository: Symbol.for("UserTokenRepository")
+    UserTokenRepository: Symbol.for("UserTokenRepository"),
+    RoleRepository: Symbol.for("RoleRepository")
 }
 
 export interface PaginateQuery {

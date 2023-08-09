@@ -22,7 +22,6 @@ export const validationMiddlewareContainerModule = new ContainerModule((bind: in
         .toConstantValue(new ValidationMiddleware(CreateUserDto))
     bind<ValidationMiddleware>(TYPE_MIDDLWARE_VALIDATION.RefreshTokenValidationMiddleware)
         .toConstantValue(new ValidationMiddleware(RefreshTokenDto))
-
     bind<ValidationMiddleware>(TYPE_MIDDLWARE_VALIDATION.RoleValidationMiddleware)
     .toConstantValue(new ValidationMiddleware(RoleDto))
 });

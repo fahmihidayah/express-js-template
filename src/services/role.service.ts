@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Role } from "@prisma/client";
 import { inject, injectable } from "inversify";
 import { RoleDto } from "../dtos/role";
@@ -9,6 +10,7 @@ export interface RoleService {
     findAll() : Promise<Role[]>
     create(roleDto : RoleDto) : Promise<Role|null>
     findById(id : number) : Promise<Role|null>
+    delete(id : number) : Promise<Role | null>
 }
 
 @injectable()
@@ -16,6 +18,9 @@ export class RoleServiceImpl implements RoleService {
 
     constructor(@inject(TYPE_REPOSITORY.RoleRepository) private _roleRepository : RoleRepository) {
 
+    }
+    public async delete(id: number): Promise<Role | null> {
+       return await this._roleRepository.delete(id)
     }
 
     public async findAll(): Promise<Role[]> {
