@@ -3,7 +3,7 @@ import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { TYPE_REPOSITORY, UsersQuery } from "../repositories";
+import { TYPE_REPOSITORY } from "../repositories";
 import { UserRepository } from "../repositories/user.repository";
 import { compare, hash } from 'bcrypt';
 import { HttpException } from "../exceptions/httpException";
@@ -15,12 +15,13 @@ import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
 import { UserTokenRepository } from "../repositories/userToken.repository";
+import { Query } from '../repositories/base';
 
 export interface UserService {
     verify(code : string) : Promise<UserData | unknown>
     login(form: LoginUserDto): Promise<UserWithToken>
     register(form: CreateUserDto): Promise<UserData | unknown>
-    findAll(UsersQuery : UsersQuery): Promise<PaginateList<UserData[]>>
+    findAll(query : Query): Promise<PaginateList<UserData[]>>
     findById(id: number): Promise<UserData | unknown>
     refreshToken(refreshTokenDto : RefreshTokenDto) : Promise<string | null>
 }
@@ -56,7 +57,7 @@ export class UserServiceImpl implements UserService {
     public async findById(id: number): Promise<UserData | unknown> {
         return await this._userRepository.findById(id)
     }
-    public async findAll(usersQuery : UsersQuery = {page : 1, take : 10, keyword : ""}): Promise<PaginateList<UserData[]>> {
+    public async findAll(usersQuery : Query = {page : 1, take : 10, keyword : ""}): Promise<PaginateList<UserData[]>> {
         const users = await this._userRepository.findAll(usersQuery)
         return {
             page : users.page,

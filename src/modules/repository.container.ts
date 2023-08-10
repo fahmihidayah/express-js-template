@@ -3,10 +3,10 @@ import { UserService, UserServiceImpl } from "../services/user.service";
 import { TYPE_REPOSITORY } from "../repositories";
 import { UserRepository, UserRepositoryImpl } from "../repositories/user.repository";
 import { UserTokenRepository, UserTokenRepositoryImpl } from "../repositories/userToken.repository";
-import { RoleRepository, RoleRepositoryImpl } from "../repositories/role.repository";
+import { GroupRepository, GroupRepositoryImpl } from "../repositories/group.reposotry";
 
 export const repositoryContainerModule = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {
     bind<UserRepository>(TYPE_REPOSITORY.UserRepository).to(UserRepositoryImpl);
     bind<UserTokenRepository>(TYPE_REPOSITORY.UserTokenRepository).to(UserTokenRepositoryImpl);
-    bind<RoleRepository>(TYPE_REPOSITORY.RoleRepository).to(RoleRepositoryImpl);
+    bind<GroupRepository>(TYPE_REPOSITORY.GroupRepository).to(GroupRepositoryImpl);
 })

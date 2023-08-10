@@ -7,7 +7,7 @@ import express from 'express';
 // import hpp from 'hpp';
 import * as bodyParser from 'body-parser';
 import "./controllers/users.controller";
-import "./controllers/roles.controller";
+import "./controllers/groups.controller";
 import { Container } from 'inversify';
 import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-utils';
 import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from './config';

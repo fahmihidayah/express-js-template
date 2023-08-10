@@ -18,10 +18,10 @@ model User {
   is_email_verified       Boolean  @default(false)
   email_verification_code String   @default("")
   is_admin                Boolean  @default(false)
-  role                    Role     @relation(fields: [role_id], references: [id])
-  role_id                 Int     @default(0)
   password                String
   user_token              UserToken?
+  groups                  Group[]
+  auth_permissions        AuthPermission[]
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
@@ -36,9 +36,18 @@ model UserToken {
 }
 
 
-model Role {
+model Group {
   id            Int       @id @default(autoincrement())
   name          String  
+  users         User[]
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+}
+
+model AuthPermission {
+  id            Int       @id @default(autoincrement())
+  code_name     String    @unique
+  name          String    
   users         User[]
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt

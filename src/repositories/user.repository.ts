@@ -3,9 +3,9 @@ import { PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { UsersQuery } from ".";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
+import { Query } from './base';
 
 export interface UserRepository {
 
@@ -21,7 +21,7 @@ export interface UserRepository {
 
     update(id: number, userForm: UpdateUserFormDto): Promise<User | null>
 
-    findAll(usersQuery: UsersQuery): Promise<PaginateList<User[]>>
+    findAll(usersQuery: Query): Promise<PaginateList<User[]>>
 
     count(): Promise<number>
 }
@@ -112,7 +112,7 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async findAll(usersQuery: UsersQuery = { page: 1, take: 10, keyword: "" }): Promise<PaginateList<User[]>> {
+    async findAll(usersQuery: Query = { page: 1, take: 10, keyword: "" }): Promise<PaginateList<User[]>> {
         const { page, take } = usersQuery;
         const skip: number = (page - 1) * take;
         const count: number = await this.count();
