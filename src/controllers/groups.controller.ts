@@ -9,6 +9,7 @@ import {
 } from "inversify-express-utils";
 import { TYPE_SERVICE } from "../services";
 import { GroupService } from "../services/group.service";
+import { GroupWithAuthPermission, GroupWithUser } from "../dtos/group";
 
 @controller("/groups")
 export class RoleController extends BaseHttpController {
@@ -16,13 +17,64 @@ export class RoleController extends BaseHttpController {
         super()
     }
 
+    @httpPost("/:groupId/user/:userId")
+    public async addUser() {
+        const params = this.httpContext.request.params;
+        const groupId = params.groupId ?? ""
+        const userId = params.userId ?? ""
+        console.log(userId)
+        return this.json({
+            message : "Success add user to group",
+            status : 200,
+            data : await this._groupService.addUser(Number(groupId), Number(userId))
+        })
+    }
+
+    @httpDelete("/:groupId/user/:userId")
+    public async deleteUser() {
+        const params = this.httpContext.request.params;
+        const groupId = params.groupId ?? ""
+        const userId = params.userId ?? ""
+        return this.json({
+            message : "Success delete user from group",
+            status : 200,
+            data : await this._groupService.removeUser(Number(groupId), Number(userId))
+        })
+    }
+
+    @httpPost("/:groupId/auth_permission/:authPermissionId")
+    public async addAuthPermission() {
+        const params = this.httpContext.request.params;
+        const groupId = params.groupId ?? ""
+        const authPermissionId = params.authPermissionId ?? ""
+        return this.json({
+            message : "Success add auth permission to group",
+            status : 200,
+            data : await this._groupService.addAuthPermission(Number(groupId), Number(authPermissionId))
+        })
+    }
+
+    @httpDelete("/:groupId/auth_permission/:authPermissionId")
+    public async deleteAuthPermission() {
+        const query = this.httpContext.request.query;
+        const groupId = query.groupId ?? ""
+        const authPermissionId = query.authPermissionId ?? ""
+        return this.json({
+            message : "Success delete auth permission from group",
+            status : 200,
+            data : await this._groupService.removeAuthPermission(Number(groupId), Number(authPermissionId))
+        })
+    }
+
     @httpGet("/")
     public async index() {
-        const { page, take, keyword } = this.httpContext.request.query
+        const query = this.httpContext.request.query
+        const { page, take } = query
+        const keyword : string = query.keyword as string
         return this.json({
             message: "Success load group",
             status: 200,
-            data: await this._groupService.findAll({ page: Number(page??"1"), take: Number(take??"5"), keyword: String(keyword) })
+            data: await this._groupService.findAll({ page: Number(page??"1"), take: Number(take??"5"), keyword: keyword ?? "" })
         })
     }
 

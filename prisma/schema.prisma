@@ -37,9 +37,10 @@ model UserToken {
 
 
 model Group {
-  id            Int       @id @default(autoincrement())
-  name          String  
-  users         User[]
+  id                Int       @id @default(autoincrement())
+  name              String  
+  users             User[]
+  auth_permissions  AuthPermission[]
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
@@ -49,6 +50,7 @@ model AuthPermission {
   code_name     String    @unique
   name          String    
   users         User[]
+  groups        Group[]
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }

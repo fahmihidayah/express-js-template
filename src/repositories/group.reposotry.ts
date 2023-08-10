@@ -1,12 +1,17 @@
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { PrismaClient, Group } from "@prisma/client";
+import { PrismaClient, Group, AuthPermission, User } from "@prisma/client";
 import { GroupDto } from "../dtos/group";
 import { GetResult } from "@prisma/client/runtime/library";
 import { Query, Repository } from "./base";
 import { PaginateList } from "../dtos";
 
 export interface GroupRepository extends Repository<GroupDto, Group, number>{
+    addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null>
+    removeAuthPermission(groupId : number, authPermissionId : number) : Promise<Group | null>
+
+    addUser(groupId : number, user : User) : Promise<Group | null>
+    removeUser(groupId : number, userId : number) : Promise<Group | null>
 }
 
 @injectable()
@@ -15,6 +20,8 @@ export class GroupRepositoryImpl implements GroupRepository {
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
 
     }
+   
+   
 
     public async update(id : number, form: GroupDto): Promise<Group | null> {
         return await this._prismaClient.group.update({
@@ -56,12 +63,79 @@ export class GroupRepositoryImpl implements GroupRepository {
             total : await this.count(),
             data : await this._prismaClient.group.findMany({
                 where : {
-                    name : query.keyword
+                    OR : [
+                        {
+                            name : { contains : query.keyword }
+                        }
+                    ]
                 }
             })
         }
     }
 
+    public async addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null> {
+        return await this._prismaClient.group.update({
+            where : {
+                id : groupId
+            },
+            data : {
+                auth_permissions : {
+                    connectOrCreate : {
+                        where : {
+                            id : authPermission.id
+                        },
+                        create : authPermission
+                    }
+                }
+            }
+        })
+    }
 
+    public async removeAuthPermission(groupId: number, authPermissionId : number): Promise<Group | null> {
+        return await this._prismaClient.group.update({
+            where : {
+                id : groupId
+            },
+            data : {
+                auth_permissions : {
+                    disconnect : {
+                        id : authPermissionId
+                    }
+                }
+            }
+        })
+    }
 
+    public async addUser(groupId: number, user : User): Promise<Group | null> {
+        return await this._prismaClient.group.update({
+            where : {
+                id : groupId
+            },
+            data : {
+                users : {
+                    connectOrCreate : {
+                        where : {
+                            id : user.id
+                        },
+                        create : user
+                    }
+                }
+            }
+        })
+    }
+
+    public async removeUser(groupId: number, userId: number): Promise<Group | null> {
+        return await this._prismaClient.group.update({
+            where : {
+                id : groupId
+            },
+            data : {
+                users : {
+                    disconnect : {
+                        id : userId
+                    }
+                }
+            }
+        })
+    }
 }
