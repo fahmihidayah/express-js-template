@@ -10,6 +10,7 @@ import {
 import { TYPE_SERVICE } from "../services";
 import { GroupService } from "../services/group.service";
 import { GroupWithAuthPermission, GroupWithUser } from "../dtos/group";
+import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/groups")
 export class RoleController extends BaseHttpController {
@@ -17,7 +18,7 @@ export class RoleController extends BaseHttpController {
         super()
     }
 
-    @httpPost("/:groupId/add_user")
+    @httpPost("/:groupId/add_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
     public async addUser() {
         const params = this.httpContext.request.params;
         const body : GroupWithUser = this.httpContext.request.body;
@@ -29,7 +30,7 @@ export class RoleController extends BaseHttpController {
         })
     }
 
-    @httpPost("/:groupId/remove_user")
+    @httpPost("/:groupId/remove_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
     public async deleteUser() {
         const params = this.httpContext.request.params;
         const body : GroupWithUser = this.httpContext.request.body;
@@ -41,7 +42,7 @@ export class RoleController extends BaseHttpController {
         })
     }
 
-    @httpPost("/:groupId/add_auth_permission")
+    @httpPost("/:groupId/add_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
     public async addAuthPermission() {
         const params = this.httpContext.request.params;
         const body : GroupWithAuthPermission = this.httpContext.request.body;
@@ -53,7 +54,7 @@ export class RoleController extends BaseHttpController {
         })
     }
 
-    @httpPost("/:groupId/remove_auth_permission")
+    @httpPost("/:groupId/remove_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
     public async deleteAuthPermission() {
         const params = this.httpContext.request.params;
         const body : GroupWithAuthPermission = this.httpContext.request.body;
@@ -78,7 +79,7 @@ export class RoleController extends BaseHttpController {
         })
     }
 
-    @httpPost("/")
+    @httpPost("/", TYPE_MIDDLWARE_VALIDATION.GroupValidationMiddleware)
     public async create() {
         const groupDto = this.httpContext.request.body;
 
@@ -91,7 +92,7 @@ export class RoleController extends BaseHttpController {
     }
 
     @httpGet("/:id")
-    public async getRole() {
+    public async get() {
         const id = this.httpContext.request.params.id
         return this.json({
             message: "Success retrieve group",
@@ -101,7 +102,7 @@ export class RoleController extends BaseHttpController {
     }
 
     @httpDelete("/:id")
-    public async deleteRole() {
+    public async delete() {
         const id = this.httpContext.request.params.id
         return this.json({
             message: "Success delete group",

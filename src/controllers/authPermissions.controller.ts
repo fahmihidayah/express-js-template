@@ -10,6 +10,7 @@ import {
 import { TYPE_SERVICE } from "../services";
 import { AuthPermissionDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/auth.permission";
 import { AuthPermissionService } from "../services/authPermission.service";
+import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/auth_permissions")
 export class AuthPermissionController extends BaseHttpController {
@@ -17,7 +18,7 @@ export class AuthPermissionController extends BaseHttpController {
         super()
     }
 
-    @httpPost("/:id/add_user")
+    @httpPost("/:id/add_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware)
     public async addUser() {
         const params = this.httpContext.request.params;
         const body : AuthPermissionWithUser = this.httpContext.request.body
@@ -29,7 +30,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPost("/:id/remove_user") 
+    @httpPost("/:id/remove_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware) 
     public async removeUser() {
         const params = this.httpContext.request.params;
         const body : AuthPermissionWithUser = this.httpContext.request.body
@@ -55,7 +56,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPost("/create_name")
+    @httpPost("/create_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
     public async createName() {
         const form : AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.createFromName(form);
@@ -66,17 +67,18 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpDelete("/delete_name")
+    @httpDelete("/delete_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
     public async deleteName() {
         const form : AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.deleteByName(form.name);
         return this.json({
             message : "Success delete collection auth permission",
             status : 200,
+            
         })
     }
 
-    @httpPost("/")
+    @httpPost("/", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
     public async create() {
         const form : AuthPermissionDto = this.httpContext.request.body;
         const data = await this._authPermissionService.create(form)
@@ -97,7 +99,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPut("/:id")
+    @httpPut("/:id", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
     public async update() {
         const id = this.httpContext.request.params.id
         const form : AuthPermissionDto = this.httpContext.request.body;
