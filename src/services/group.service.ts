@@ -12,15 +12,22 @@ import { AuthPermissionRepository } from '../repositories/authPermission.reposit
 
 export interface GroupService {
     create(groupDto : GroupDto) : Promise<Group | null>
+
     findAll(query : Query) : Promise<PaginateList<Array<Group>>>
+
     delete(id : number) : Promise<Group | null>
+
     findById(id : number) : Promise<Group | null>
 
     addAuthPermission(groupId : number, authPermissionId : number) : Promise<Group | null>
+
     removeAuthPermission(groupId : number, authPermissionId : number) : Promise<Group | null>
 
     addUser(groupId : number, userId : number) : Promise<Group | null>
+
     removeUser(groupId : number, userId : number) : Promise<Group | null>
+
+    isUserInGroupName(user : User, groupName : string) : Promise<boolean>
 }
 
 @injectable()
@@ -30,8 +37,12 @@ export class GroupServiceImpl implements GroupService {
         @inject(TYPE_REPOSITORY.GroupRepository) private _groupRepository : GroupRepository,
         @inject(TYPE_REPOSITORY.UserRepository) private _userRepository : UserRepository,
         @inject(TYPE_REPOSITORY.AuthPermissionRepository) private _authPermissionRepository : AuthPermissionRepository) {
-
     }
+    
+    public async isUserInGroupName(user: User, groupName: string): Promise<boolean> {
+        return false
+    }
+
     public async addUser(groupId: number, userId: number): Promise<Group | null> {
         const user = await this._userRepository.findById(userId) as User
         return await this._groupRepository.addUser(groupId, user);

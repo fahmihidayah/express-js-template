@@ -21,49 +21,49 @@ export class RoleController extends BaseHttpController {
     @httpPost("/:groupId/add_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
     public async addUser() {
         const params = this.httpContext.request.params;
-        const body : GroupWithUser = this.httpContext.request.body;
+        const body: GroupWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         return this.json({
-            message : "Success add user to group",
-            status : 200,
-            data : await this._groupService.addUser(Number(groupId), Number(body.user_id))
+            message: "Success add user to group",
+            status: 200,
+            data: await this._groupService.addUser(Number(groupId), Number(body.user_id))
         })
     }
 
     @httpPost("/:groupId/remove_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
     public async deleteUser() {
         const params = this.httpContext.request.params;
-        const body : GroupWithUser = this.httpContext.request.body;
+        const body: GroupWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         return this.json({
-            message : "Success delete user from group",
-            status : 200,
-            data : await this._groupService.removeUser(Number(groupId), Number(body.user_id))
+            message: "Success delete user from group",
+            status: 200,
+            data: await this._groupService.removeUser(Number(groupId), Number(body.user_id))
         })
     }
 
     @httpPost("/:groupId/add_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
     public async addAuthPermission() {
         const params = this.httpContext.request.params;
-        const body : GroupWithAuthPermission = this.httpContext.request.body;
+        const body: GroupWithAuthPermission = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         return this.json({
-            message : "Success add auth permission to group",
-            status : 200,
-            data : await this._groupService.addAuthPermission(Number(groupId), Number(body.auth_permission_id))
+            message: "Success add auth permission to group",
+            status: 200,
+            data: await this._groupService.addAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 
     @httpPost("/:groupId/remove_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
     public async deleteAuthPermission() {
         const params = this.httpContext.request.params;
-        const body : GroupWithAuthPermission = this.httpContext.request.body;
+        const body: GroupWithAuthPermission = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         console.log(body)
         return this.json({
-            message : "Success delete auth permission from group",
-            status : 200,
-            data : await this._groupService.removeAuthPermission(Number(groupId), Number(body.auth_permission_id))
+            message: "Success delete auth permission from group",
+            status: 200,
+            data: await this._groupService.removeAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 
@@ -71,11 +71,11 @@ export class RoleController extends BaseHttpController {
     public async index() {
         const query = this.httpContext.request.query
         const { page, take } = query
-        const keyword : string = query.keyword as string
+        const keyword: string = query.keyword as string
         return this.json({
             message: "Success load group",
             status: 200,
-            data: await this._groupService.findAll({ page: Number(page??"1"), take: Number(take??"5"), keyword: keyword ?? "" })
+            data: await this._groupService.findAll({ page: Number(page ?? "1"), take: Number(take ?? "5"), keyword: keyword ?? "" })
         })
     }
 

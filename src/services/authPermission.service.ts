@@ -12,15 +12,27 @@ import { UserRepository } from "../repositories/user.repository"
 export interface AuthPermissionService {
 
     create(form: AuthPermissionDto): Promise<AuthPermission | null>
+
     createFromName(form : AuthPermissionNameDto) : Promise<Array<AuthPermission>>
+
     deleteByName(name : string) : Promise<boolean>
+
     findAll(query: Query): Promise<PaginateList<Array<AuthPermission>>>
+
     update(id : number, form : AuthPermissionDto): Promise<AuthPermission | null>
+
     delete(id: number): Promise<AuthPermission | null>
+
     findById(id: number): Promise<AuthPermission | null>
 
     addUser(authPermissionId : number, userId : number) : Promise<AuthPermission | null>
+
     removeUser(authPermissionId : number, userId : number) : Promise<AuthPermission | null>
+
+    isUserHasPermissionName(user : User, name : Array<string>) : Promise<boolean> 
+
+    isUserHasPermissionCodeName(user : User, codeName : Array<string>) : Promise<boolean> 
+
 
 }
 
@@ -30,6 +42,15 @@ export class AuthPermissionImpl implements AuthPermissionService {
         @inject(TYPE_REPOSITORY.AuthPermissionRepository) private _authPermissionRepository: AuthPermissionRepository,
         @inject(TYPE_REPOSITORY.UserRepository) private _userRepository: UserRepository,
         ) { }
+
+    public async isUserHasPermissionName(user: User, name: string[]): Promise<boolean> {
+        return false
+    }
+    
+    public async isUserHasPermissionCodeName(user: User, codeName: string[]): Promise<boolean> {
+        return false
+    }
+
     public async deleteByName(name: string): Promise<boolean> {
         return await this._authPermissionRepository.deleteByName(name)
     }
