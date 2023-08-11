@@ -40,7 +40,8 @@ export class GroupServiceImpl implements GroupService {
     }
     
     public async isUserInGroupName(user: User, groupName: string): Promise<boolean> {
-        return false
+        const countGroup = await this._groupRepository.countGroupByUser(groupName, user);
+        return countGroup >= 1;
     }
 
     public async addUser(groupId: number, userId: number): Promise<Group | null> {

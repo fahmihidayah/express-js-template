@@ -12,6 +12,8 @@ export interface GroupRepository extends Repository<GroupDto, Group, number>{
 
     addUser(groupId : number, user : User) : Promise<Group | null>
     removeUser(groupId : number, userId : number) : Promise<Group | null>
+
+    countGroupByUser(name : string, user : User) : Promise<number>
 }
 
 @injectable()
@@ -19,6 +21,19 @@ export class GroupRepositoryImpl implements GroupRepository {
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
 
+    }
+    
+    public async countGroupByUser(name: string, user: User): Promise<number> {
+        return await this._prismaClient.group.count({
+            where : {
+                name : name,
+                users : {
+                    some : {
+                        id : user.id
+                    }
+                }
+            }
+        })
     }
    
    

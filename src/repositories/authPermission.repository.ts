@@ -1,4 +1,4 @@
-import { AuthPermission, PrismaClient, User } from "@prisma/client";
+import { AuthPermission, PrismaClient, User, Prisma } from "@prisma/client";
 import { AuthPermissionDto } from "../dtos/auth.permission";
 import { Query, Repository } from "./base";
 import { inject, injectable } from "inversify";
@@ -8,8 +8,14 @@ import { PaginateList } from "../dtos";
 
 export interface AuthPermissionRepository extends Repository<AuthPermissionDto, AuthPermission, number> {
     addUser(authPermissionId: number, user: User): Promise<AuthPermission | null>
+
     removeUser(authPermissionId: number, user: User): Promise<AuthPermission | null>
-    deleteByName(name : string) : Promise<boolean>
+
+    deleteByName(name: string): Promise<boolean>
+
+    countNamesByUser(names: Array<string>, user: User): Promise<number>
+
+    countCodeNameByUser(names: Array<string>, user: User): Promise<number>
 }
 
 @injectable()
@@ -18,10 +24,44 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient) {
 
     }
+    public async countCodeNameByUser(names: string[], user: User): Promise<number> {
+        const codeNamesQuery = names.map(e => { return { code_name: e } })
+        const count = await this._prismaClient.authPermission.count({
+            where: {
+                OR: [
+                    ...codeNamesQuery
+                ],
+                users: {
+                    some: {
+                        id: user.id
+                    }
+                }
+            }
+        })
+        console.log(count)
+        return count;
+    }
+
+    public async countNamesByUser(names: string[], user: User): Promise<number> {
+        const namesQuery = names.map(e => { return { name: e } })
+        return await this._prismaClient.authPermission.count({
+            where: {
+                OR: [
+                    ...namesQuery
+                ],
+                users: {
+                    some: {
+                        id: user.id
+                    }
+                }
+            }
+        })
+    }
+
     public async deleteByName(name: string): Promise<boolean> {
         const result = await this._prismaClient.authPermission.deleteMany({
-            where : {
-                name : name
+            where: {
+                name: name
             }
         })
         return result.count > 0

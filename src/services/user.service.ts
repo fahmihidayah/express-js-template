@@ -10,7 +10,7 @@ import { HttpException } from "../exceptions/httpException";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
 import { SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
-import { createToken, renewToken, userToUserData, userToUserWithToken } from "../utils/auth.utils";
+import { createToken, renewToken, userToUserData, userToUserWithToken } from "../utils/authentication.utils";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";

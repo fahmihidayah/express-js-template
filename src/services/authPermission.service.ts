@@ -44,11 +44,13 @@ export class AuthPermissionImpl implements AuthPermissionService {
         ) { }
 
     public async isUserHasPermissionName(user: User, name: string[]): Promise<boolean> {
-        return false
+        const count = await this._authPermissionRepository.countNamesByUser(name, user);
+        return count >= 1;
     }
     
     public async isUserHasPermissionCodeName(user: User, codeName: string[]): Promise<boolean> {
-        return false
+        const count = await this._authPermissionRepository.countCodeNameByUser(codeName, user);
+        return count >= 1;
     }
 
     public async deleteByName(name: string): Promise<boolean> {
