@@ -9,3 +9,13 @@ export class AuthPermissionDto {
     public code_name : string = "";
     
 }
+
+export class AuthPermissionNameDto {
+    @IsNotEmpty()
+    public name : string = "";
+}
+
+export class AuthPermissionWithUser {
+    @IsNotEmpty()
+    public user_id : string = ""
+}

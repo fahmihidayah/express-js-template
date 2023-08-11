@@ -17,52 +17,52 @@ export class RoleController extends BaseHttpController {
         super()
     }
 
-    @httpPost("/:groupId/user/:userId")
+    @httpPost("/:groupId/add_user")
     public async addUser() {
         const params = this.httpContext.request.params;
+        const body : GroupWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
-        const userId = params.userId ?? ""
-        console.log(userId)
         return this.json({
             message : "Success add user to group",
             status : 200,
-            data : await this._groupService.addUser(Number(groupId), Number(userId))
+            data : await this._groupService.addUser(Number(groupId), Number(body.user_id))
         })
     }
 
-    @httpDelete("/:groupId/user/:userId")
+    @httpPost("/:groupId/remove_user")
     public async deleteUser() {
         const params = this.httpContext.request.params;
+        const body : GroupWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
-        const userId = params.userId ?? ""
         return this.json({
             message : "Success delete user from group",
             status : 200,
-            data : await this._groupService.removeUser(Number(groupId), Number(userId))
+            data : await this._groupService.removeUser(Number(groupId), Number(body.user_id))
         })
     }
 
-    @httpPost("/:groupId/auth_permission/:authPermissionId")
+    @httpPost("/:groupId/add_auth_permission")
     public async addAuthPermission() {
         const params = this.httpContext.request.params;
+        const body : GroupWithAuthPermission = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
-        const authPermissionId = params.authPermissionId ?? ""
         return this.json({
             message : "Success add auth permission to group",
             status : 200,
-            data : await this._groupService.addAuthPermission(Number(groupId), Number(authPermissionId))
+            data : await this._groupService.addAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 
-    @httpDelete("/:groupId/auth_permission/:authPermissionId")
+    @httpPost("/:groupId/remove_auth_permission")
     public async deleteAuthPermission() {
-        const query = this.httpContext.request.query;
-        const groupId = query.groupId ?? ""
-        const authPermissionId = query.authPermissionId ?? ""
+        const params = this.httpContext.request.params;
+        const body : GroupWithAuthPermission = this.httpContext.request.body;
+        const groupId = params.groupId ?? ""
+        console.log(body)
         return this.json({
             message : "Success delete auth permission from group",
             status : 200,
-            data : await this._groupService.removeAuthPermission(Number(groupId), Number(authPermissionId))
+            data : await this._groupService.removeAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 

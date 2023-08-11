@@ -8,14 +8,40 @@ import {
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
 import { TYPE_SERVICE } from "../services";
-import { AuthPermissionDto } from "../dtos/auth.permission";
-import { AuthPermissionService } from "../services/authPermission.repository";
+import { AuthPermissionDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/auth.permission";
+import { AuthPermissionService } from "../services/authPermission.service";
 
 @controller("/auth_permissions")
 export class AuthPermissionController extends BaseHttpController {
     constructor(@inject(TYPE_SERVICE.AuthPermissionService) private _authPermissionService : AuthPermissionService) {
         super()
     }
+
+    @httpPost("/:id/add_user")
+    public async addUser() {
+        const params = this.httpContext.request.params;
+        const body : AuthPermissionWithUser = this.httpContext.request.body
+        const authPermissionid = params.id ?? ""
+        return this.json({
+            message : "Success add user to permission",
+            status : 200,
+            data : await this._authPermissionService.addUser(Number(authPermissionid), Number(body.user_id))
+        })
+    }
+
+    @httpPost("/:id/remove_user") 
+    public async removeUser() {
+        const params = this.httpContext.request.params;
+        const body : AuthPermissionWithUser = this.httpContext.request.body
+        const authPermissionid = params.id ?? ""
+        return this.json({
+            message : "Success add user to permission",
+            status : 200,
+            data : await this._authPermissionService.removeUser(Number(authPermissionid), Number(body.user_id))
+        })
+    }
+
+
 
     @httpGet("/")
     public async index() {
@@ -29,20 +55,40 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
+    @httpPost("/create_name")
+    public async createName() {
+        const form : AuthPermissionNameDto = this.httpContext.request.body;
+        const data = await this._authPermissionService.createFromName(form);
+        return this.json({
+            message : "Success create collection auth permission",
+            status : 200,
+            data : data
+        })
+    }
+
+    @httpDelete("/delete_name")
+    public async deleteName() {
+        const form : AuthPermissionNameDto = this.httpContext.request.body;
+        const data = await this._authPermissionService.deleteByName(form.name);
+        return this.json({
+            message : "Success delete collection auth permission",
+            status : 200,
+        })
+    }
+
     @httpPost("/")
     public async create() {
-        const groupDto = this.httpContext.request.body;
-
-        const role = await this._authPermissionService.create(groupDto)
+        const form : AuthPermissionDto = this.httpContext.request.body;
+        const data = await this._authPermissionService.create(form)
         return this.json({
             message: "Success created auth permission",
             status: 200,
-            data: role
+            data: data
         })
     }
 
     @httpGet("/:id")
-    public async getRole() {
+    public async get() {
         const id = this.httpContext.request.params.id
         return this.json({
             message: "Success retrieve auth permission",
@@ -51,8 +97,20 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
+    @httpPut("/:id")
+    public async update() {
+        const id = this.httpContext.request.params.id
+        const form : AuthPermissionDto = this.httpContext.request.body;
+        const data = await this._authPermissionService.update(Number(id), form)
+        return this.json({
+            message: "Success retrieve auth permission",
+            status: 200,
+            data: data
+        })
+    }
+
     @httpDelete("/:id")
-    public async deleteRole() {
+    public async delete() {
         const id = this.httpContext.request.params.id
         return this.json({
             message: "Success delete auth permission",
