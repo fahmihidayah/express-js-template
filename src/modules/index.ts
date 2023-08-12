@@ -2,9 +2,7 @@ import { Container } from "inversify";
 import { InversifyExpressServer } from "inversify-express-utils";
 import { prismaContainerModule } from "./prisma.container";
 import { middleWareContainerModule } from "./middleware.container";
-import { serviceContainerModule } from "./service.container";
 import { validationMiddlewareContainerModule } from "./validation.middleware.module";
-import { repositoryContainerModule } from "./repository.container";
 // import "./controllers/users.controller";
 
 function mergeContainer(containers: Array<Container>): Container {
@@ -21,9 +19,7 @@ const container = new Container({ autoBindInjectable: true });
 
 container.load(
     prismaContainerModule,
-    repositoryContainerModule,
     middleWareContainerModule,
-    serviceContainerModule,
     validationMiddlewareContainerModule
     )
 

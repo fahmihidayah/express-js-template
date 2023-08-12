@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as express from "express";
 import { id, inject } from 'inversify';
 import {
@@ -7,15 +8,17 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { TYPE_SERVICE } from "../services";
-import { GroupService } from "../services/group.service";
+import { GroupService, GroupServiceImpl } from "../services/group.service";
 import { GroupWithAuthPermission, GroupWithUser } from "../dtos/group";
 import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/groups")
 export class RoleController extends BaseHttpController {
-    constructor(@inject(TYPE_SERVICE.GroupService) private _groupService: GroupService) {
+    private _groupService: GroupService
+    constructor(
+        groupService: GroupServiceImpl) {
         super()
+        this._groupService = groupService
     }
 
     @httpPost("/:groupId/add_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)

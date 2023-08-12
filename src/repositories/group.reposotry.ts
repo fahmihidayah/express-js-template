@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { PrismaClient, Group, AuthPermission, User } from "@prisma/client";
@@ -5,6 +6,7 @@ import { GroupDto } from "../dtos/group";
 import { GetResult } from "@prisma/client/runtime/library";
 import { Query, Repository } from "./base";
 import { PaginateList } from "../dtos";
+import { provide } from "inversify-binding-decorators";
 
 export interface GroupRepository extends Repository<GroupDto, Group, number>{
     addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null>
@@ -16,7 +18,7 @@ export interface GroupRepository extends Repository<GroupDto, Group, number>{
     countGroupByUser(name : string, user : User) : Promise<number>
 }
 
-@injectable()
+@provide(GroupRepositoryImpl)
 export class GroupRepositoryImpl implements GroupRepository {
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {

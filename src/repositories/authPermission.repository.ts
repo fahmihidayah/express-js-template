@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { AuthPermission, PrismaClient, User, Prisma } from "@prisma/client";
 import { AuthPermissionDto } from "../dtos/auth.permission";
 import { Query, Repository } from "./base";
@@ -5,6 +6,7 @@ import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
+import { provide } from "inversify-binding-decorators";
 
 export interface AuthPermissionRepository extends Repository<AuthPermissionDto, AuthPermission, number> {
     addUser(authPermissionId: number, user: User): Promise<AuthPermission | null>
@@ -18,7 +20,7 @@ export interface AuthPermissionRepository extends Repository<AuthPermissionDto, 
     countCodeNameByUser(names: Array<string>, user: User): Promise<number>
 }
 
-@injectable()
+@provide(AuthPermissionRepositoryImpl)
 export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient) {

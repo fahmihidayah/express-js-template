@@ -1,4 +1,4 @@
-
+import 'reflect-metadata';
 import { inject } from "inversify";
 import * as express from "express";
 import {
@@ -8,21 +8,24 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { TYPE_SERVICE } from "../services";
-import { GroupService } from "../services/group.service";
+import { GroupService, GroupServiceImpl } from "../services/group.service";
 import { RequestWithUser } from "../interfaces/auth.interfaces";
 import { TYPE_MIDDLEWARE } from "../middlewares";
 import { AuthPermission } from "@prisma/client";
-import { AuthPermissionService } from "../services/authPermission.service";
+import { AuthPermissionService, AuthPermissionServiceImpl } from "../services/authPermission.service";
 
 @controller("/tasks")
 export class TaskController extends BaseHttpController {
+    private _groupService : GroupService;
+    private _authPermissionService : AuthPermissionService
 
     constructor(
-        @inject(TYPE_SERVICE.GroupService) private _groupService : GroupService,
-        @inject(TYPE_SERVICE.AuthPermissionService) private _authPermissionService : AuthPermissionService
+        groupService : GroupServiceImpl,
+        authPermissionService : AuthPermissionServiceImpl
     ) {
         super()
+        this._groupService = groupService
+        this._authPermissionService = authPermissionService
     }
 
     @httpGet("/edit/:id", TYPE_MIDDLEWARE.AuthMiddleware) 

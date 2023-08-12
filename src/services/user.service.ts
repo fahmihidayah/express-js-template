@@ -3,8 +3,7 @@ import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
 import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { TYPE_REPOSITORY } from "../repositories";
-import { UserRepository } from "../repositories/user.repository";
+import { UserRepository, UserRepositoryImpl } from "../repositories/user.repository";
 import { compare, hash } from 'bcrypt';
 import { HttpException } from "../exceptions/httpException";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
@@ -14,8 +13,9 @@ import { createToken, renewToken, userToUserData, userToUserWithToken } from "..
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
-import { UserTokenRepository } from "../repositories/userToken.repository";
+import { UserTokenRepository, UserTokenRepositoryImpl } from "../repositories/userToken.repository";
 import { Query } from '../repositories/base';
+import { provide } from 'inversify-binding-decorators';
 
 export interface UserService {
     verify(code : string) : Promise<UserData | unknown>
@@ -26,14 +26,18 @@ export interface UserService {
     refreshToken(refreshTokenDto : RefreshTokenDto) : Promise<string | null>
 }
 
-@injectable()
+@provide(UserServiceImpl)
 export class UserServiceImpl implements UserService {
 
-    constructor(
-        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository: UserRepository,
-        @inject(TYPE_REPOSITORY.UserTokenRepository) private _userTokenRepository : UserTokenRepository,
-    ) {
+    private _userRepository : UserRepository
+    private _userTokenRepository : UserTokenRepository
 
+    constructor(
+        userRepositoryImpl : UserRepositoryImpl,
+        userTokenRepositoryImpl : UserTokenRepositoryImpl
+    ) {
+        this._userRepository = userRepositoryImpl
+        this._userTokenRepository = userTokenRepositoryImpl
     }
 
     public async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null> {

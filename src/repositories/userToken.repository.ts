@@ -3,6 +3,7 @@ import { PrismaClient, User, UserToken } from "@prisma/client";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
+import { provide } from 'inversify-binding-decorators';
 
 export interface UserTokenRepository {
     findByToken(token : string) : Promise<UserToken | null>
@@ -12,7 +13,7 @@ export interface UserTokenRepository {
 
 }
 
-@injectable()
+@provide(UserTokenRepositoryImpl)
 export class UserTokenRepositoryImpl implements UserTokenRepository {
 
     constructor(

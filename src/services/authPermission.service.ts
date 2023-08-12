@@ -3,11 +3,10 @@ import { AuthPermissionDto, AuthPermissionNameDto } from "../dtos/auth.permissio
 import { Query } from "../repositories/base"
 import { PaginateList } from "../dtos"
 import { inject, injectable } from "inversify"
-import { TYPE_SERVICE } from "."
-import { TYPE_REPOSITORY } from "../repositories"
-import { AuthPermissionRepository } from "../repositories/authPermission.repository"
+import { AuthPermissionRepository, AuthPermissionRepositoryImpl } from "../repositories/authPermission.repository"
 import { GetResult } from "@prisma/client/runtime/library"
-import { UserRepository } from "../repositories/user.repository"
+import { UserRepository, UserRepositoryImpl } from "../repositories/user.repository"
+import { provide } from "inversify-binding-decorators"
 
 export interface AuthPermissionService {
 
@@ -36,12 +35,18 @@ export interface AuthPermissionService {
 
 }
 
-@injectable()
-export class AuthPermissionImpl implements AuthPermissionService {
+@provide(AuthPermissionServiceImpl)
+export class AuthPermissionServiceImpl implements AuthPermissionService {
+
+    private _authPermissionRepository: AuthPermissionRepository;
+    private _userRepository: UserRepository;
     constructor(
-        @inject(TYPE_REPOSITORY.AuthPermissionRepository) private _authPermissionRepository: AuthPermissionRepository,
-        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository: UserRepository,
-        ) { }
+        authPermissionRepository: AuthPermissionRepositoryImpl,
+        userRepository: UserRepositoryImpl,
+        ) { 
+            this._authPermissionRepository = authPermissionRepository
+            this._userRepository = userRepository
+        }
 
     public async isUserHasPermissionName(user: User, name: string[]): Promise<boolean> {
         const count = await this._authPermissionRepository.countNamesByUser(name, user);

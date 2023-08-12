@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as express from "express";
 import { inject } from 'inversify';
 import {
@@ -7,8 +8,7 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { TYPE_SERVICE } from "../services";
-import { UserService } from "../services/user.service";
+import { UserService, UserServiceImpl } from "../services/user.service";
 import { SECRET_KEY } from "../config";
 import { CreateUserDto, UserData } from "../dtos/user";
 import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
@@ -20,11 +20,12 @@ import { PaginateList } from "../dtos";
 
 @controller("/users")
 export class UserController extends BaseHttpController {   
-
+    private _userService : UserService
     constructor(
-        @inject(TYPE_SERVICE.UserService) private _userService : UserService
+        userService : UserServiceImpl
     ) {
         super()
+        this._userService = userService
     }
 
     @httpGet("/")

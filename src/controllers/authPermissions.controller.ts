@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as express from "express";
 import { id, inject } from 'inversify';
 import {
@@ -7,38 +8,41 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { TYPE_SERVICE } from "../services";
 import { AuthPermissionDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/auth.permission";
-import { AuthPermissionService } from "../services/authPermission.service";
+import { AuthPermissionService, AuthPermissionServiceImpl } from "../services/authPermission.service";
 import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/auth_permissions")
 export class AuthPermissionController extends BaseHttpController {
-    constructor(@inject(TYPE_SERVICE.AuthPermissionService) private _authPermissionService : AuthPermissionService) {
+    private _authPermissionService: AuthPermissionService
+    constructor(
+        authPermissionService: AuthPermissionServiceImpl
+    ) {
         super()
+        this._authPermissionService = authPermissionService
     }
 
     @httpPost("/:id/add_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware)
     public async addUser() {
         const params = this.httpContext.request.params;
-        const body : AuthPermissionWithUser = this.httpContext.request.body
+        const body: AuthPermissionWithUser = this.httpContext.request.body
         const authPermissionid = params.id ?? ""
         return this.json({
-            message : "Success add user to permission",
-            status : 200,
-            data : await this._authPermissionService.addUser(Number(authPermissionid), Number(body.user_id))
+            message: "Success add user to permission",
+            status: 200,
+            data: await this._authPermissionService.addUser(Number(authPermissionid), Number(body.user_id))
         })
     }
 
-    @httpPost("/:id/remove_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware) 
+    @httpPost("/:id/remove_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware)
     public async removeUser() {
         const params = this.httpContext.request.params;
-        const body : AuthPermissionWithUser = this.httpContext.request.body
+        const body: AuthPermissionWithUser = this.httpContext.request.body
         const authPermissionid = params.id ?? ""
         return this.json({
-            message : "Success add user to permission",
-            status : 200,
-            data : await this._authPermissionService.removeUser(Number(authPermissionid), Number(body.user_id))
+            message: "Success add user to permission",
+            status: 200,
+            data: await this._authPermissionService.removeUser(Number(authPermissionid), Number(body.user_id))
         })
     }
 
@@ -48,39 +52,39 @@ export class AuthPermissionController extends BaseHttpController {
     public async index() {
         const query = this.httpContext.request.query
         const { page, take } = query
-        const keyword : string = query.keyword as string
+        const keyword: string = query.keyword as string
         return this.json({
             message: "Success load auth permission",
             status: 200,
-            data: await this._authPermissionService.findAll({ page: Number(page??"1"), take: Number(take??"5"), keyword: keyword ?? "" })
+            data: await this._authPermissionService.findAll({ page: Number(page ?? "1"), take: Number(take ?? "5"), keyword: keyword ?? "" })
         })
     }
 
     @httpPost("/create_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
     public async createName() {
-        const form : AuthPermissionNameDto = this.httpContext.request.body;
+        const form: AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.createFromName(form);
         return this.json({
-            message : "Success create collection auth permission",
-            status : 200,
-            data : data
+            message: "Success create collection auth permission",
+            status: 200,
+            data: data
         })
     }
 
     @httpDelete("/delete_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
     public async deleteName() {
-        const form : AuthPermissionNameDto = this.httpContext.request.body;
+        const form: AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.deleteByName(form.name);
         return this.json({
-            message : "Success delete collection auth permission",
-            status : 200,
-            
+            message: "Success delete collection auth permission",
+            status: 200,
+
         })
     }
 
     @httpPost("/", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
     public async create() {
-        const form : AuthPermissionDto = this.httpContext.request.body;
+        const form: AuthPermissionDto = this.httpContext.request.body;
         const data = await this._authPermissionService.create(form)
         return this.json({
             message: "Success created auth permission",
@@ -102,7 +106,7 @@ export class AuthPermissionController extends BaseHttpController {
     @httpPut("/:id", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
     public async update() {
         const id = this.httpContext.request.params.id
-        const form : AuthPermissionDto = this.httpContext.request.body;
+        const form: AuthPermissionDto = this.httpContext.request.body;
         const data = await this._authPermissionService.update(Number(id), form)
         return this.json({
             message: "Success retrieve auth permission",

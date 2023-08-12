@@ -6,6 +6,7 @@ import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { Query } from './base';
+import { provide } from 'inversify-binding-decorators';
 
 export interface UserRepository {
 
@@ -27,7 +28,7 @@ export interface UserRepository {
 }
 
 
-@injectable()
+@provide(UserRepositoryImpl)
 export class UserRepositoryImpl implements UserRepository {
 
     constructor(

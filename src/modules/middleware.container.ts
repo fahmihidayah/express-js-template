@@ -1,6 +1,5 @@
 import { Container, ContainerModule, interfaces } from "inversify";
 import { UserService, UserServiceImpl } from "../services/user.service";
-import { TYPE_SERVICE } from "../services";
 import { AuthMiddleware } from "../middlewares/auth.middleware";
 import { ErrorMiddleware } from "../middlewares/error.middleware";
 import { TYPE_MIDDLEWARE } from "../middlewares";

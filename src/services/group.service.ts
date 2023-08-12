@@ -1,14 +1,14 @@
 import 'reflect-metadata';
 import { inject, injectable } from "inversify";
 import { GetResult } from "@prisma/client/runtime/library";
-import { TYPE_REPOSITORY } from "../repositories";
-import { GroupRepository } from '../repositories/group.reposotry';
+import { GroupRepository, GroupRepositoryImpl } from '../repositories/group.reposotry';
 import { GroupDto } from '../dtos/group';
 import { Query } from '../repositories/base';
 import { AuthPermission, Group, User } from '@prisma/client';
 import { PaginateList } from '../dtos';
-import { UserRepository } from '../repositories/user.repository';
-import { AuthPermissionRepository } from '../repositories/authPermission.repository';
+import { UserRepository, UserRepositoryImpl } from '../repositories/user.repository';
+import { AuthPermissionRepository, AuthPermissionRepositoryImpl } from '../repositories/authPermission.repository';
+import { provide } from 'inversify-binding-decorators';
 
 export interface GroupService {
     create(groupDto : GroupDto) : Promise<Group | null>
@@ -30,13 +30,21 @@ export interface GroupService {
     isUserInGroupName(user : User, groupName : string) : Promise<boolean>
 }
 
-@injectable()
+@provide(GroupServiceImpl)
 export class GroupServiceImpl implements GroupService {
 
+    private _groupRepository : GroupRepository
+    private _userRepository : UserRepository
+    private _authPermissionRepository : AuthPermissionRepository
+
     constructor(
-        @inject(TYPE_REPOSITORY.GroupRepository) private _groupRepository : GroupRepository,
-        @inject(TYPE_REPOSITORY.UserRepository) private _userRepository : UserRepository,
-        @inject(TYPE_REPOSITORY.AuthPermissionRepository) private _authPermissionRepository : AuthPermissionRepository) {
+        groupRepository : GroupRepositoryImpl,
+        userRepository : UserRepositoryImpl,
+        authPermissionRepository : AuthPermissionRepositoryImpl) 
+        {
+            this._authPermissionRepository = authPermissionRepository
+            this._groupRepository = groupRepository
+            this._userRepository = userRepository
     }
     
     public async isUserInGroupName(user: User, groupName: string): Promise<boolean> {

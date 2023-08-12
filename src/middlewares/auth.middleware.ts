@@ -9,8 +9,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { inject, injectable } from 'inversify';
 import prisma from '../../prisma/index';
-import { TYPE_SERVICE } from '../services';
-import { UserService } from '../services/user.service';
+import { UserService, UserServiceImpl } from '../services/user.service';
 // import { SECRET_KEY } from '@config';
 // import { HttpException } from '@exceptions/httpException';
 // import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
@@ -27,9 +26,12 @@ const getAuthorization = (req: Request): string | null => {
 
 @injectable()
 export class AuthMiddleware extends BaseMiddleware {
+    private _userService : UserService
+    
 
-    constructor(@inject(TYPE_SERVICE.UserService) private _userService : UserService) {
+    constructor(userService : UserServiceImpl) {
         super()
+        this._userService = userService
     }
 
     async handler(req: RequestWithUser,
