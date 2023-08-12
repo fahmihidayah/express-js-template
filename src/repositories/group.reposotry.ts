@@ -1,7 +1,7 @@
-import 'reflect-metadata';
+
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { PrismaClient, Group, AuthPermission, User } from "@prisma/client";
+import { PrismaClient, Group, AuthPermission, User, Prisma } from "@prisma/client";
 import { GroupDto } from "../dtos/group";
 import { GetResult } from "@prisma/client/runtime/library";
 import { Query, Repository } from "./base";
@@ -21,12 +21,14 @@ export interface GroupRepository extends Repository<GroupDto, Group, number>{
 @provide(GroupRepositoryImpl)
 export class GroupRepositoryImpl implements GroupRepository {
 
-    constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
+    private _group : Prisma.GroupDelegate
 
+    constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
+        this._group = _prismaClient.group
     }
     
     public async countGroupByUser(name: string, user: User): Promise<number> {
-        return await this._prismaClient.group.count({
+        return await this._group.count({
             where : {
                 name : name,
                 users : {
@@ -41,7 +43,7 @@ export class GroupRepositoryImpl implements GroupRepository {
    
 
     public async update(id : number, form: GroupDto): Promise<Group | null> {
-        return await this._prismaClient.group.update({
+        return await this._group.update({
             where : {
                 id : id
             },
@@ -50,14 +52,14 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async findById(id: number): Promise<Group | null> {
-        return await this._prismaClient.group.findUnique({
+        return await this._group.findUnique({
             where : {
                 id : id
             }
         })
     }
     public async delete(id: number): Promise<Group | null> {
-        return await this._prismaClient.group.delete({
+        return await this._group.delete({
             where : {
                 id : id
             }
@@ -65,11 +67,11 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async count(): Promise<number> {
-        return await this._prismaClient.group.count()
+        return await this._group.count()
     }
     
     public async create(groupDto: GroupDto): Promise<Group | null> {
-        return await this._prismaClient.group.create({
+        return await this._group.create({
             data : groupDto
         })
     }
@@ -78,7 +80,7 @@ export class GroupRepositoryImpl implements GroupRepository {
         return {
             page : query.page,
             total : await this.count(),
-            data : await this._prismaClient.group.findMany({
+            data : await this._group.findMany({
                 where : {
                     OR : [
                         {
@@ -91,7 +93,7 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null> {
-        return await this._prismaClient.group.update({
+        return await this._group.update({
             where : {
                 id : groupId
             },
@@ -109,7 +111,7 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async removeAuthPermission(groupId: number, authPermissionId : number): Promise<Group | null> {
-        return await this._prismaClient.group.update({
+        return await this._group.update({
             where : {
                 id : groupId
             },
@@ -124,7 +126,7 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async addUser(groupId: number, user : User): Promise<Group | null> {
-        return await this._prismaClient.group.update({
+        return await this._group.update({
             where : {
                 id : groupId
             },
@@ -142,7 +144,7 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async removeUser(groupId: number, userId: number): Promise<Group | null> {
-        return await this._prismaClient.group.update({
+        return await this._group.update({
             where : {
                 id : groupId
             },

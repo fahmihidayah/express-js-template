@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { PrismaClient, User, UserToken } from "@prisma/client";
+import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
@@ -16,13 +16,15 @@ export interface UserTokenRepository {
 @provide(UserTokenRepositoryImpl)
 export class UserTokenRepositoryImpl implements UserTokenRepository {
 
+    private _userToken : Prisma.UserTokenDelegate
+
     constructor(
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient
     ) {
-
+        this._userToken = _prismaClient.userToken
     }
     public async updateToken(user:User, token: string): Promise<UserToken | null> {
-        return await this._prismaClient.userToken.update({
+        return await this._userToken.update({
             where : {
                 user_id : user.id
             },
@@ -32,14 +34,14 @@ export class UserTokenRepositoryImpl implements UserTokenRepository {
         })
     }
     public async findByUser(user: User): Promise<UserToken | null> {
-        return await this._prismaClient.userToken.findFirst({
+        return await this._userToken.findFirst({
             where : {
                 user_id : user.id
             }
         })
     }
     public async createToken(user: User, token: string): Promise<UserToken | null> {
-        return await this._prismaClient.userToken.create({
+        return await this._userToken.create({
             data : {
                 user_id : user.id,
                 token : token
@@ -48,7 +50,7 @@ export class UserTokenRepositoryImpl implements UserTokenRepository {
     }
 
     public async findByToken(token: string): Promise<UserToken | null> {
-        return await this._prismaClient.userToken.findFirst({
+        return await this._userToken.findFirst({
             where : {
                 token : token
             }

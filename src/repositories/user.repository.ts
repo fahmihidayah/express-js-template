@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { PrismaClient, User } from "@prisma/client";
+import { Prisma, PrismaClient, User } from "@prisma/client";
 import { CreateUserDto, UpdateUserDto, UpdateUserFormDto, UserData } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
@@ -30,20 +30,21 @@ export interface UserRepository {
 
 @provide(UserRepositoryImpl)
 export class UserRepositoryImpl implements UserRepository {
+    private _user : Prisma.UserDelegate
 
     constructor(
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient
     ) {
-
+        this._user = _prismaClient.user
     }
     async count(): Promise<number> {
-        return await this._prismaClient.user.count();
+        return await this._user.count();
     }
 
 
     async verifyUser(user: User | null): Promise<User | null> {
 
-        return await this._prismaClient.user.update({
+        return await this._user.update({
             data: {
                 is_email_verified: true,
             },
@@ -53,7 +54,7 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
     async findByVerifyCode(code: string): Promise<User | null> {
-        return await this._prismaClient.user.findFirst({
+        return await this._user.findFirst({
             where: {
                 email_verification_code: code,
                 is_email_verified: false
@@ -62,7 +63,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     async findById(id: number): Promise<User | null> {
-        return await this._prismaClient.user.findUnique({
+        return await this._user.findUnique({
             where: {
                 id: id
             }
@@ -70,13 +71,13 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     async create(user: CreateUserDto): Promise<User | null> {
-        return await this._prismaClient.user.create({
+        return await this._user.create({
             data: user
         })
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        return await this._prismaClient.user.findUnique({
+        return await this._user.findUnique({
             where: {
                 email: email
             }
@@ -105,7 +106,7 @@ export class UserRepositoryImpl implements UserRepository {
             updatedUserForm.password = userForm.password
         }
 
-        return await this._prismaClient.user.update({
+        return await this._user.update({
             where: {
                 id: id
             },
@@ -118,7 +119,7 @@ export class UserRepositoryImpl implements UserRepository {
         const skip: number = (page - 1) * take;
         const count: number = await this.count();
         const total: number = Math.ceil(count / take)
-        const data: Array<User> = await this._prismaClient.user.findMany({
+        const data: Array<User> = await this._user.findMany({
             skip: skip,
             take: take,
             where: {

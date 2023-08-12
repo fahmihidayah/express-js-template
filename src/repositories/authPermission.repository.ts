@@ -23,12 +23,15 @@ export interface AuthPermissionRepository extends Repository<AuthPermissionDto, 
 @provide(AuthPermissionRepositoryImpl)
 export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
 
+    private _authPermission : Prisma.AuthPermissionDelegate
+
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient) {
+        this._authPermission = _prismaClient.authPermission
 
     }
     public async countCodeNameByUser(names: string[], user: User): Promise<number> {
         const codeNamesQuery = names.map(e => { return { code_name: e } })
-        const count = await this._prismaClient.authPermission.count({
+        const count = await this._authPermission.count({
             where: {
                 OR: [
                     ...codeNamesQuery
@@ -46,7 +49,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
 
     public async countNamesByUser(names: string[], user: User): Promise<number> {
         const namesQuery = names.map(e => { return { name: e } })
-        return await this._prismaClient.authPermission.count({
+        return await this._authPermission.count({
             where: {
                 OR: [
                     ...namesQuery
@@ -61,7 +64,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async deleteByName(name: string): Promise<boolean> {
-        const result = await this._prismaClient.authPermission.deleteMany({
+        const result = await this._authPermission.deleteMany({
             where: {
                 name: name
             }
@@ -69,7 +72,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         return result.count > 0
     }
     public async addUser(authPermissionId: number, user: User): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.update({
+        return await this._authPermission.update({
             where: {
                 id: authPermissionId
             },
@@ -88,7 +91,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         })
     }
     public async removeUser(authPermissionId: number, user: User): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.update({
+        return await this._authPermission.update({
             where: {
                 id: authPermissionId
             },
@@ -107,7 +110,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         return {
             page: query.page,
             total: await this.count(),
-            data: await this._prismaClient.authPermission.findMany({
+            data: await this._authPermission.findMany({
                 where: {
                     OR: [
                         {
@@ -123,13 +126,13 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async create(form: AuthPermissionDto): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.create({
+        return await this._authPermission.create({
             data: form
         })
     }
 
     public async update(id: number, form: AuthPermissionDto): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.update({
+        return await this._authPermission.update({
             where: {
                 id: id
             },
@@ -138,7 +141,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async findById(id: number): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.findUnique({
+        return await this._authPermission.findUnique({
             where: {
                 id: id
             }
@@ -146,7 +149,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async delete(id: number): Promise<AuthPermission | null> {
-        return await this._prismaClient.authPermission.delete({
+        return await this._authPermission.delete({
             where: {
                 id: id
             }
@@ -154,7 +157,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async count(): Promise<number> {
-        return await this._prismaClient.authPermission.count();
+        return await this._authPermission.count();
     }
 
 }
