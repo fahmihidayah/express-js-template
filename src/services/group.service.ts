@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { inject, injectable } from "inversify";
 import { GetResult } from "@prisma/client/runtime/library";
-import { GroupRepository, GroupRepositoryImpl } from '../repositories/group.reposotry';
+import { GroupRepository, GroupRepositoryImpl } from '../repositories/group.repository';
 import { GroupDto } from '../dtos/group';
 import { Query } from '../repositories/base';
 import { AuthPermission, Group, User } from '@prisma/client';

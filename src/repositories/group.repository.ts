@@ -1,14 +1,19 @@
-
+import 'reflect-metadata';
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { PrismaClient, Group, AuthPermission, User, Prisma } from "@prisma/client";
 import { GroupDto } from "../dtos/group";
 import { GetResult } from "@prisma/client/runtime/library";
-import { Query, Repository } from "./base";
+import { CreateRepository, DeleteRepository, Query, Repository, RetrieveRepository, UpdateRepository } from "./base";
 import { PaginateList } from "../dtos";
 import { provide } from "inversify-binding-decorators";
 
-export interface GroupRepository extends Repository<GroupDto, Group, number>{
+export interface GroupRepository extends 
+    RetrieveRepository<Group>,
+    UpdateRepository<GroupDto, Group, number>,
+    CreateRepository<GroupDto, Group>,
+    DeleteRepository<Group, number> {
+        
     addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null>
     removeAuthPermission(groupId : number, authPermissionId : number) : Promise<Group | null>
 
@@ -76,20 +81,48 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async findAll(query : Query) : Promise<PaginateList<Array<Group>>> {
-        return {
-            page : query.page,
-            total : await this.count(),
-            data : await this._group.findMany({
-                where : {
-                    OR : [
-                        {
-                            name : { contains : query.keyword }
+    public async findAll(query: Query): Promise<Array<Group>> {
+        return await this._group.findMany();
+    }
+
+    public async countByQuery(query: Query): Promise<number> {
+        return await this._group.count({
+            where : {
+                OR : [
+                    {
+                        name : {
+                            contains : query.keyword
                         }
-                    ]
-                }
-            })
-        }
+                    }
+                ]
+            }
+        })
+    }
+
+    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Group>>> {
+        const { page, take } = query;
+        const skip: number = (page - 1) * take;
+        const count: number = await this.countByQuery(query)
+        const total: number = Math.ceil(count / take)
+        const data: Array<Group> = await this._group.findMany({
+            skip: skip,
+            take: take,
+            where: {
+                OR: [
+                    {
+                        name: {
+
+                            contains: query.keyword
+                        }
+                    }
+                ]
+            }
+        })
+        return {
+            page: page,
+            total: total,
+            data: data
+        };
     }
 
     public async addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null> {

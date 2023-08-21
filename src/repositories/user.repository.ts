@@ -5,40 +5,67 @@ import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
-import { Query } from './base';
+import { CreateRepository, DeleteRepository, Query, RetrieveRepository, UpdateRepository } from './base';
 import { provide } from 'inversify-binding-decorators';
 
-export interface UserRepository {
+export interface UserRepository extends RetrieveRepository<User>,
+    UpdateRepository<UpdateUserFormDto, User, number>,
+    CreateRepository<CreateUserDto, User>,
+    DeleteRepository<User, number> {
 
     findByVerifyCode(code: string): Promise<User | null>
 
     verifyUser(user: User | null): Promise<User | null>
 
-    create(user: CreateUserDto): Promise<User | null>
-
     findByEmail(email: string): Promise<User | null>
 
-    findById(id: number): Promise<User | null>
-
-    update(id: number, userForm: UpdateUserFormDto): Promise<User | null>
-
-    findAll(usersQuery: Query): Promise<PaginateList<User[]>>
-
-    count(): Promise<number>
 }
 
 
 @provide(UserRepositoryImpl)
 export class UserRepositoryImpl implements UserRepository {
-    private _user : Prisma.UserDelegate
+    private _user: Prisma.UserDelegate
 
     constructor(
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient
     ) {
         this._user = _prismaClient.user
     }
-    async count(): Promise<number> {
+    public async delete(id: number): Promise<User | null> {
+        return await this._user.delete({
+            where: {
+                id: id
+            }
+        }
+        );
+    }
+
+    public async count(): Promise<number> {
         return await this._user.count();
+    }
+
+    public async countByQuery(query: Query): Promise<number> {
+        return await this._user.count({
+            where: {
+                OR: [
+                    {
+                        email: {
+                            contains: query.keyword
+                        }
+                    },
+                    {
+                        first_name: {
+                            contains: query.keyword
+                        }
+                    },
+                    {
+                        last_name: {
+                            contains: query.keyword
+                        }
+                    }
+                ]
+            }
+        })
     }
 
 
@@ -114,10 +141,10 @@ export class UserRepositoryImpl implements UserRepository {
         })
     }
 
-    async findAll(usersQuery: Query = { page: 1, take: 10, keyword: "" }): Promise<PaginateList<User[]>> {
-        const { page, take } = usersQuery;
+    public async findAllPaginate(query: Query): Promise<PaginateList<User[]>> {
+        const { page, take } = query;
         const skip: number = (page - 1) * take;
-        const count: number = await this.count();
+        const count: number = await this.countByQuery(query)
         const total: number = Math.ceil(count / take)
         const data: Array<User> = await this._user.findMany({
             skip: skip,
@@ -126,17 +153,18 @@ export class UserRepositoryImpl implements UserRepository {
                 OR: [
                     {
                         email: {
-                            contains: usersQuery.keyword
+                            contains: query.keyword
                         }
                     },
                     {
                         first_name: {
-                            contains: usersQuery.keyword
+                            contains: query.keyword
                         }
                     },
                     {
                         last_name: {
-                            contains: usersQuery.keyword
+
+                            contains: query.keyword
                         }
                     }
                 ]
@@ -150,4 +178,28 @@ export class UserRepositoryImpl implements UserRepository {
         };
     }
 
+    public async findAll(query: Query): Promise<Array<User>> {
+        return await this._user.findMany({
+            where: {
+                OR: [
+                    {
+                        email: {
+                            contains: query.keyword
+                        }
+                    },
+                    {
+                        first_name: {
+                            contains: query.keyword
+                        }
+                    },
+                    {
+                        last_name: {
+
+                            contains: query.keyword
+                        }
+                    }
+                ]
+            }
+        })
+    }
 }

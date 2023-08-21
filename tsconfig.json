@@ -29,7 +29,7 @@
     "@utils/*": ["utils/*"]
   },
   "include": [
-    "src/**/*.ts", "src/**/*.json", ".env"
+    "src/**/*.ts", "src/**/*.json", ".env", "prisma/**/*.ts", "*.ts"
   ],
   "exclude": ["node_modules", "src/http", "src/logs"]
 }
