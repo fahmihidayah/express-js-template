@@ -126,4 +126,24 @@ describe('Group Repository', () => {
         expect(groups.data.length).toEqual(2)
     })
 
+    test('add user to group success', async () => {
+        const groupDto = {
+            name : "group test",
+        }
+        const newGroup = await groupRepository.create(groupDto) as Group
+        const group = await groupRepository.addUser(newGroup.id, user)
+        const numberOfUserInGroup = await groupRepository.countGroupByUser(newGroup.id, user.id)
+        expect(1).toEqual(numberOfUserInGroup)
+    })
+
+    test('remove user from group success', async () => {
+        const groupDto = {
+            name : "group test",
+        }
+        const newGroup = await groupRepository.create(groupDto) as Group
+        await groupRepository.addUser(newGroup.id, user)
+        await groupRepository.removeUser(newGroup.id, user.id)
+        const numberOfUserInGroup = await groupRepository.countGroupByUser(newGroup.id, user.id)
+        expect(0).toEqual(numberOfUserInGroup)
+    });
 })

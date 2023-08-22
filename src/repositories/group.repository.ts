@@ -20,7 +20,7 @@ export interface GroupRepository extends
     addUser(groupId : number, user : User) : Promise<Group | null>
     removeUser(groupId : number, userId : number) : Promise<Group | null>
 
-    countGroupByUser(name : string, user : User) : Promise<number>
+    countGroupByUser(groupId: number, userId : number) : Promise<number>
 }
 
 @provide(GroupRepositoryImpl)
@@ -32,13 +32,13 @@ export class GroupRepositoryImpl implements GroupRepository {
         this._group = _prismaClient.group
     }
     
-    public async countGroupByUser(name: string, user: User): Promise<number> {
+    public async countGroupByUser(groupId: number, userId : number): Promise<number> {
         return await this._group.count({
             where : {
-                name : name,
+                id : groupId,
                 users : {
                     some : {
-                        id : user.id
+                        id : userId
                     }
                 }
             }
