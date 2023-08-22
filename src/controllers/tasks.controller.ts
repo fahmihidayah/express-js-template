@@ -86,7 +86,7 @@ export class TaskController extends BaseHttpController {
     public async index(@request() request : RequestWithUser) {
         const user = request.user
 
-        const isAllow = await this._groupService.isUserInGroupName(user, "admin")
+        const isAllow = await this._groupService.isUserInGroupName(user, 1)
 
         if(isAllow) {
             return this.json({

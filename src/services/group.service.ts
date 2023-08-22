@@ -13,7 +13,7 @@ import { provide } from 'inversify-binding-decorators';
 export interface GroupService {
     create(groupDto : GroupDto) : Promise<Group | null>
 
-    findAll(query : Query) : Promise<PaginateList<Array<Group>>>
+    findAllPaginate(query : Query) : Promise<PaginateList<Array<Group>>>
 
     delete(id : number) : Promise<Group | null>
 
@@ -27,7 +27,7 @@ export interface GroupService {
 
     removeUser(groupId : number, userId : number) : Promise<Group | null>
 
-    isUserInGroupName(user : User, groupName : string) : Promise<boolean>
+    isUserInGroupName(user: User, groupId : number) : Promise<boolean>
 }
 
 @provide(GroupServiceImpl)
@@ -47,8 +47,8 @@ export class GroupServiceImpl implements GroupService {
             this._userRepository = userRepository
     }
     
-    public async isUserInGroupName(user: User, groupName: string): Promise<boolean> {
-        const countGroup = await this._groupRepository.countGroupByUser(groupName, user);
+    public async isUserInGroupName(user: User, groupId : number): Promise<boolean> {
+        const countGroup = await this._groupRepository.countGroupByUser(groupId, user.id);
         return countGroup >= 1;
     }
 
@@ -77,8 +77,8 @@ export class GroupServiceImpl implements GroupService {
         return await this._groupRepository.create(groupDto)
     }
 
-    public async findAll(query: Query): Promise<PaginateList<Array<Group>>> {
-        return await this._groupRepository.findAll(query)
+    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Group>>> {
+        return await this._groupRepository.findAllPaginate(query)
     }
 
     public async delete(id: number): Promise<Group | null> {

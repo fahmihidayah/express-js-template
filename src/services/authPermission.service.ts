@@ -16,7 +16,7 @@ export interface AuthPermissionService {
 
     deleteByName(name : string) : Promise<boolean>
 
-    findAll(query: Query): Promise<PaginateList<Array<AuthPermission>>>
+    findAllPaginate(query: Query): Promise<PaginateList<Array<AuthPermission>>>
 
     update(id : number, form : AuthPermissionDto): Promise<AuthPermission | null>
 
@@ -49,12 +49,12 @@ export class AuthPermissionServiceImpl implements AuthPermissionService {
         }
 
     public async isUserHasPermissionName(user: User, name: string[]): Promise<boolean> {
-        const count = await this._authPermissionRepository.countNamesByUser(name, user);
+        const count = await this._authPermissionRepository.countNamesByUser(name, user.id);
         return count >= 1;
     }
     
     public async isUserHasPermissionCodeName(user: User, codeName: string[]): Promise<boolean> {
-        const count = await this._authPermissionRepository.countCodeNameByUser(codeName, user);
+        const count = await this._authPermissionRepository.countCodeNamesByUser(codeName, user.id);
         return count >= 1;
     }
 
@@ -86,16 +86,15 @@ export class AuthPermissionServiceImpl implements AuthPermissionService {
     }
 
     public async removeUser(authPermissionId: number, userId: number): Promise<AuthPermission | null> {
-        const user = await this._userRepository.findById(userId) as User;
-        return await this._authPermissionRepository.removeUser(authPermissionId, user)
+        return await this._authPermissionRepository.removeUser(authPermissionId, userId)
     }
 
     public async create(form: AuthPermissionDto): Promise<AuthPermission | null> {
         return await this._authPermissionRepository.create(form)
     }
 
-    public async findAll(query: Query): Promise<PaginateList<AuthPermission[]>> {
-        return await this._authPermissionRepository.findAll(query)
+    public async findAllPaginate(query: Query): Promise<PaginateList<AuthPermission[]>> {
+        return await this._authPermissionRepository.findAllPaginate(query)
     }
 
     public async delete(id: number): Promise<AuthPermission | null> {

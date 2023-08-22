@@ -51,12 +51,16 @@ export class AuthPermissionController extends BaseHttpController {
     @httpGet("/")
     public async index() {
         const query = this.httpContext.request.query
-        const { page, take } = query
-        const keyword: string = query.keyword as string
+        const page = Number(query.page ?? "1")
+        const take = Number(query.take ?? "5")
+        const orderBy = ( query.order_by ?? "id") as string
+        const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
+        const keyword = (query.keyword??"") as string
+        const result = await this._authPermissionService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
         return this.json({
             message: "Success load auth permission",
             status: 200,
-            data: await this._authPermissionService.findAll({ page: Number(page ?? "1"), take: Number(take ?? "5"), keyword: keyword ?? "" })
+            ... result
         })
     }
 

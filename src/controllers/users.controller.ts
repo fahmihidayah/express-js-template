@@ -31,19 +31,16 @@ export class UserController extends BaseHttpController {
     @httpGet("/")
     public async index() {
         const query = this.httpContext.request.query
-        let page = query.page as string;
-        let take = query.take as string;
-        let keyword = query.keyword as string;
-        const users : PaginateList<UserData[]> = await this._userService.findAll({
-            page : Number(page??"1"), 
-            take : Number(take??"5"),
-            keyword : keyword??""
-        })
+        const page = Number(query.page ?? "1")
+        const take = Number(query.take ?? "5")
+        const orderBy = ( query.order_by ?? "id") as string
+        const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
+        const keyword = (query.keyword??"") as string
+        const result = await this._userService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
         return this.json({
-            message : "Users Loaded",
-            code : 200,
-            error : false,
-            ... users
+            message: "Success load users",
+            status: 200,
+            ... result
         })
     }
 

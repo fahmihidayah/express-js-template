@@ -21,7 +21,7 @@ export interface UserService {
     verify(code : string) : Promise<UserData | unknown>
     login(form: LoginUserDto): Promise<UserWithToken>
     register(form: CreateUserDto): Promise<UserData | unknown>
-    findAll(query : Query): Promise<PaginateList<UserData[]>>
+    findAllPaginate(query : Query): Promise<PaginateList<UserData[]>>
     findById(id: number): Promise<UserData | unknown>
     refreshToken(refreshTokenDto : RefreshTokenDto) : Promise<string | null>
 }
@@ -61,8 +61,8 @@ export class UserServiceImpl implements UserService {
     public async findById(id: number): Promise<UserData | unknown> {
         return await this._userRepository.findById(id)
     }
-    public async findAll(usersQuery : Query = {page : 1, take : 10, keyword : ""}): Promise<PaginateList<UserData[]>> {
-        const users = await this._userRepository.findAll(usersQuery)
+    public async findAllPaginate(usersQuery : Query = {page : 1, take : 10, keyword : "", orderBy : "id", orderByDirection : "asc"}): Promise<PaginateList<UserData[]>> {
+        const users = await this._userRepository.findAllPaginate(usersQuery)
         return {
             page : users.page,
             total : users.total,
