@@ -10,11 +10,11 @@ import { provide } from "inversify-binding-decorators"
 
 export interface AuthPermissionService {
 
-    create(form: AuthPermissionDto): Promise<AuthPermission | null>
-
     createFromName(form : AuthPermissionNameDto) : Promise<Array<AuthPermission>>
 
     deleteByName(name : string) : Promise<boolean>
+
+    create(form: AuthPermissionDto): Promise<AuthPermission | null>
 
     findAllPaginate(query: Query): Promise<PaginateList<Array<AuthPermission>>>
 

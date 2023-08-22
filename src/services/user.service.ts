@@ -18,31 +18,32 @@ import { Query } from '../repositories/base';
 import { provide } from 'inversify-binding-decorators';
 
 export interface UserService {
-    verify(code : string) : Promise<UserData | unknown>
+    verify(code: string): Promise<UserData | null>
     login(form: LoginUserDto): Promise<UserWithToken>
-    register(form: CreateUserDto): Promise<UserData | unknown>
-    findAllPaginate(query : Query): Promise<PaginateList<UserData[]>>
-    findById(id: number): Promise<UserData | unknown>
-    refreshToken(refreshTokenDto : RefreshTokenDto) : Promise<string | null>
+    register(form: CreateUserDto): Promise<UserData | null>
+    refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null>
+
+    findAllPaginate(query: Query): Promise<PaginateList<UserData[]>>
+    findById(id: number): Promise<UserData | null>
 }
 
 @provide(UserServiceImpl)
 export class UserServiceImpl implements UserService {
 
-    private _userRepository : UserRepository
-    private _userTokenRepository : UserTokenRepository
+    private _userRepository: UserRepository
+    private _userTokenRepository: UserTokenRepository
 
     constructor(
-        userRepositoryImpl : UserRepositoryImpl,
-        userTokenRepositoryImpl : UserTokenRepositoryImpl
+        userRepositoryImpl: UserRepositoryImpl,
+        userTokenRepositoryImpl: UserTokenRepositoryImpl
     ) {
         this._userRepository = userRepositoryImpl
         this._userTokenRepository = userTokenRepositoryImpl
     }
 
     public async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null> {
-        const userToken = await this._userTokenRepository.findByToken(refreshTokenDto.refreshToken) 
-        if(userToken !== null) {
+        const userToken = await this._userTokenRepository.findByToken(refreshTokenDto.refresh_token)
+        if (userToken !== null) {
             return renewToken(userToken?.id)
         }
         else {
@@ -50,23 +51,26 @@ export class UserServiceImpl implements UserService {
         }
     }
 
-    public async verify(code: string): Promise<User| unknown> {
-       const user : User | null = await this._userRepository.findByVerifyCode(code);
-       if(user !== null) {
+    public async verify(code: string): Promise<UserData | null> {
+        const user: User | null = await this._userRepository.findByVerifyCode(code);
+        if (user !== null) {
             const updateUser = await this._userRepository.verifyUser(user)
             return userToUserData(updateUser as User);
-       }
+        }
+        else {
+            return null
+        }
     }
 
-    public async findById(id: number): Promise<UserData | unknown> {
+    public async findById(id: number): Promise<UserData | null> {
         return await this._userRepository.findById(id)
     }
-    public async findAllPaginate(usersQuery : Query = {page : 1, take : 10, keyword : "", orderBy : "id", orderByDirection : "asc"}): Promise<PaginateList<UserData[]>> {
+    public async findAllPaginate(usersQuery: Query = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserData[]>> {
         const users = await this._userRepository.findAllPaginate(usersQuery)
         return {
-            page : users.page,
-            total : users.total,
-            data : users.data.map<UserData>((user)=> {return userToUserData(user as User)})
+            page: users.page,
+            total: users.total,
+            data: users.data.map<UserData>((user) => { return userToUserData(user as User) })
         }
     }
 
@@ -80,7 +84,7 @@ export class UserServiceImpl implements UserService {
         const tokenData = await createToken(user);
         // const cookie = this.createCookie(tokenData);
         const userToken = await this._userTokenRepository.findByUser(user);
-        if(userToken === null) {
+        if (userToken === null) {
             await this._userTokenRepository.createToken(user, tokenData.refresh_token);
         }
         else {
@@ -89,9 +93,9 @@ export class UserServiceImpl implements UserService {
         return userToUserWithToken(user, tokenData);
     }
 
-    public async register(form: CreateUserDto): Promise<UserData | unknown> {
+    public async register(form: CreateUserDto): Promise<UserData | null> {
         const hashPassword = await hash(form.password, 10)
-        const encryptForm = { ...form, password: hashPassword, email_verification_code : createRandomNumber() }
+        const encryptForm = { ...form, password: hashPassword, email_verification_code: createRandomNumber() }
         const newUser = await this._userRepository.create(encryptForm)
         return userToUserData(newUser as User)
     }

@@ -7,6 +7,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/prisma/singleton.ts'],
   testEnvironment: "@quramy/jest-prisma/environment",
   testEnvironmentOptions: {
-    verboseQuery: true,
+    verboseQuery: false,
   },
 };

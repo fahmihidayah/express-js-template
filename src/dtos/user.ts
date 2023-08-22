@@ -13,7 +13,7 @@ export class LoginUserDto {
 
 export class RefreshTokenDto {
     @IsNotEmpty()
-    public refreshToken : string = "";
+    public refresh_token : string = "";
 }
 
 export class CreateUserDto {

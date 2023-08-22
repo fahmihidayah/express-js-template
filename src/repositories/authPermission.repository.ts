@@ -63,7 +63,6 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
                 }
             }
         })
-        console.log(count)
         return count;
     }
 
