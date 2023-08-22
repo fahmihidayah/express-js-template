@@ -75,8 +75,7 @@ describe("User Service", () => {
         const token = userWithToken.refresh_token
 
         const userToken = await userService.refreshToken({refresh_token : token})
-    
-
+        expect(userToken).not.equal(null)
     })
 
 })
