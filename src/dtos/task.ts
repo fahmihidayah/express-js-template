@@ -12,8 +12,8 @@ export class TaskFormDto {
 
 export class TaskData {
     constructor(
-        public user : Task
+        public task : Task
     ) {
-        
+
     }
 }

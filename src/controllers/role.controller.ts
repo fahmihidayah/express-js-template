@@ -10,7 +10,6 @@ import {
 } from "inversify-express-utils";
 import { RoleService, RoleServiceImpl } from "../services/role.service";
 import { GroupWithAuthPermission, RoleWithUser } from "../dtos/role";
-// import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/groups")
 export class RoleController extends BaseHttpController {
