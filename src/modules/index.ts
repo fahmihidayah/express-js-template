@@ -1,27 +1,17 @@
 import { Container } from "inversify";
 import { InversifyExpressServer } from "inversify-express-utils";
 import { prismaContainerModule } from "./prisma.container";
+// import { validationMiddlewareContainerModule } from "./validation.middleware.module";
+import { buildProviderModule } from "inversify-binding-decorators";
 import { middleWareContainerModule } from "./middleware.container";
-import { validationMiddlewareContainerModule } from "./validation.middleware.module";
-// import "./controllers/users.controller";
-
-function mergeContainer(containers: Array<Container>): Container {
-    let finalContainer: any = containers[0];
-    containers.forEach(container => {
-        if (finalContainer !== container) {
-            finalContainer = Container.merge(finalContainer, container)
-        }
-    })
-    return finalContainer
-}
 
 const container = new Container({ autoBindInjectable: true });
 
 container.load(
     prismaContainerModule,
     middleWareContainerModule,
-    validationMiddlewareContainerModule
-    )
+    buildProviderModule()
+)
 
 const port = process.env.PORT || 3000;
 

@@ -6,6 +6,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { injectable } from 'inversify';
 import { stat } from 'fs';
+import { provide } from 'inversify-binding-decorators';
 
 export const ErrorFunctionMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +23,7 @@ export const ErrorFunctionMiddleware = (error: HttpException, req: Request, res:
   }
 };
 
-@injectable()
+
 export class ErrorMiddleware extends BaseMiddleware {
   handler(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction): void {
     try {

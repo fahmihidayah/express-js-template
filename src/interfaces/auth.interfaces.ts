@@ -1,5 +1,6 @@
 import { User } from '@prisma/client';
 import { Request } from 'express';
+import { UserData } from '../dtos/user';
 
 export interface DataStoredInToken {
   id: number;
@@ -12,5 +13,5 @@ export interface TokenData {
 }
 
 export interface RequestWithUser extends Request {
-  user: User;
+  userData: UserData;
 }

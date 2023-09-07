@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { UserService, UserServiceImpl } from "../user.service";
 import { expect } from 'chai';
-import { LoginUserDto, UserWithToken, CreateUserDto, UserData } from "../../dtos/user";
+import { LoginUserDto, UserWithToken, CreateUserDto, UserNoPassword } from "../../dtos/user";
 import { length } from "class-validator";
 import { User, UserToken } from ".prisma/client";
 import { hash } from "bcrypt";
@@ -55,7 +55,7 @@ describe("User Service", () => {
             email: "fahmi@regService.com",
             password : "Test@1234"}
 
-        const userData = await userService.register(createUserDto) as UserData
+        const userData = await userService.register(createUserDto) as UserNoPassword
         expect(userData?.email).to.equal("fahmi@regService.com")
     })
 

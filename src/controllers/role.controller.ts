@@ -8,44 +8,44 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { GroupService, GroupServiceImpl } from "../services/group.service";
-import { GroupWithAuthPermission, GroupWithUser } from "../dtos/group";
-import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
+import { RoleService, RoleServiceImpl } from "../services/role.service";
+import { GroupWithAuthPermission, RoleWithUser } from "../dtos/role";
+// import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/groups")
 export class RoleController extends BaseHttpController {
-    private _groupService: GroupService
+    private _roleService: RoleService
     constructor(
-        groupService: GroupServiceImpl) {
+        RoleService: RoleServiceImpl) {
         super()
-        this._groupService = groupService
+        this._roleService = RoleService
     }
 
-    @httpPost("/:groupId/add_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
+    @httpPost("/:groupId/add_user")
     public async addUser() {
         const params = this.httpContext.request.params;
-        const body: GroupWithUser = this.httpContext.request.body;
+        const body: RoleWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         return this.json({
             message: "Success add user to group",
             status: 200,
-            data: await this._groupService.addUser(Number(groupId), Number(body.user_id))
+            data: await this._roleService.addUser(Number(groupId), Number(body.user_id))
         })
     }
 
-    @httpPost("/:groupId/remove_user", TYPE_MIDDLWARE_VALIDATION.GroupWithUserValidationMiddleware)
+    @httpPost("/:groupId/remove_user")
     public async deleteUser() {
         const params = this.httpContext.request.params;
-        const body: GroupWithUser = this.httpContext.request.body;
+        const body: RoleWithUser = this.httpContext.request.body;
         const groupId = params.groupId ?? ""
         return this.json({
             message: "Success delete user from group",
             status: 200,
-            data: await this._groupService.removeUser(Number(groupId), Number(body.user_id))
+            data: await this._roleService.removeUser(Number(groupId), Number(body.user_id))
         })
     }
 
-    @httpPost("/:groupId/add_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
+    @httpPost("/:groupId/add_auth_permission")
     public async addAuthPermission() {
         const params = this.httpContext.request.params;
         const body: GroupWithAuthPermission = this.httpContext.request.body;
@@ -53,11 +53,11 @@ export class RoleController extends BaseHttpController {
         return this.json({
             message: "Success add auth permission to group",
             status: 200,
-            data: await this._groupService.addAuthPermission(Number(groupId), Number(body.auth_permission_id))
+            data: await this._roleService.addAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 
-    @httpPost("/:groupId/remove_auth_permission", TYPE_MIDDLWARE_VALIDATION.GroupWithAuthPermissionValidationMiddleware)
+    @httpPost("/:groupId/remove_auth_permission")
     public async deleteAuthPermission() {
         const params = this.httpContext.request.params;
         const body: GroupWithAuthPermission = this.httpContext.request.body;
@@ -66,7 +66,7 @@ export class RoleController extends BaseHttpController {
         return this.json({
             message: "Success delete auth permission from group",
             status: 200,
-            data: await this._groupService.removeAuthPermission(Number(groupId), Number(body.auth_permission_id))
+            data: await this._roleService.removeAuthPermission(Number(groupId), Number(body.auth_permission_id))
         })
     }
 
@@ -78,7 +78,7 @@ export class RoleController extends BaseHttpController {
         const orderBy = ( query.order_by ?? "id") as string
         const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
         const keyword = (query.keyword??"") as string
-        const result = await this._groupService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
+        const result = await this._roleService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
         return this.json({
             message: "Success load group",
             status: 200,
@@ -86,11 +86,11 @@ export class RoleController extends BaseHttpController {
         })
     }
 
-    @httpPost("/", TYPE_MIDDLWARE_VALIDATION.GroupValidationMiddleware)
+    @httpPost("/")
     public async create() {
         const groupDto = this.httpContext.request.body;
 
-        const role = await this._groupService.create(groupDto)
+        const role = await this._roleService.create(groupDto)
         return this.json({
             message: "Success created group",
             status: 200,
@@ -104,7 +104,7 @@ export class RoleController extends BaseHttpController {
         return this.json({
             message: "Success retrieve group",
             status: 200,
-            data: await this._groupService.findById(Number(id))
+            data: await this._roleService.findById(Number(id))
         })
     }
 
@@ -114,7 +114,7 @@ export class RoleController extends BaseHttpController {
         return this.json({
             message: "Success delete group",
             status: 200,
-            data: await this._groupService.delete(Number(id))
+            data: await this._roleService.delete(Number(id))
         })
     }
 }

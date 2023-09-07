@@ -1,41 +1,41 @@
 import 'reflect-metadata';
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
-import { PrismaClient, Group, AuthPermission, User, Prisma } from "@prisma/client";
-import { GroupDto } from "../dtos/group";
+import { PrismaClient, Role, Permission, User, Prisma } from "@prisma/client";
+import { RoleFormDto } from "../dtos/role";
 import { GetResult } from "@prisma/client/runtime/library";
 import { CreateRepository, DeleteRepository, Query, Repository, RetrieveRepository, UpdateRepository } from "./base";
 import { PaginateList } from "../dtos";
 import { provide } from "inversify-binding-decorators";
 
-export interface GroupRepository extends 
-    RetrieveRepository<Group>,
-    UpdateRepository<GroupDto, Group, number>,
-    CreateRepository<GroupDto, Group>,
-    DeleteRepository<Group, number> {
+export interface RoleRepository extends 
+    RetrieveRepository<Role>,
+    UpdateRepository<RoleFormDto, Role, number>,
+    CreateRepository<RoleFormDto, Role>,
+    DeleteRepository<Role, number> {
         
-    addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null>
-    removeAuthPermission(groupId : number, authPermissionId : number) : Promise<Group | null>
+    addAuthPermission(RoleId : number, authPermission : Permission) : Promise<Role | null>
+    removeAuthPermission(RoleId : number, authPermissionId : number) : Promise<Role | null>
 
-    addUser(groupId : number, user : User) : Promise<Group | null>
-    removeUser(groupId : number, userId : number) : Promise<Group | null>
+    addUser(RoleId : number, user : User) : Promise<Role | null>
+    removeUser(RoleId : number, userId : number) : Promise<Role | null>
 
-    countGroupByUser(groupId: number, userId : number) : Promise<number>
+    countRoleByUser(RoleId: number, userId : number) : Promise<number>
 }
 
-@provide(GroupRepositoryImpl)
-export class GroupRepositoryImpl implements GroupRepository {
+@provide(RoleRepositoryImpl)
+export class RoleRepositoryImpl implements RoleRepository {
 
-    private _group : Prisma.GroupDelegate
+    private _role : Prisma.RoleDelegate
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
-        this._group = _prismaClient.group
+        this._role = _prismaClient.role
     }
     
-    public async countGroupByUser(groupId: number, userId : number): Promise<number> {
-        return await this._group.count({
+    public async countRoleByUser(RoleId: number, userId : number): Promise<number> {
+        return await this._role.count({
             where : {
-                id : groupId,
+                id : RoleId,
                 users : {
                     some : {
                         id : userId
@@ -47,8 +47,8 @@ export class GroupRepositoryImpl implements GroupRepository {
    
    
 
-    public async update(id : number, form: GroupDto): Promise<Group | null> {
-        return await this._group.update({
+    public async update(id : number, form: RoleFormDto): Promise<Role | null> {
+        return await this._role.update({
             where : {
                 id : id
             },
@@ -56,15 +56,15 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async findById(id: number): Promise<Group | null> {
-        return await this._group.findUnique({
+    public async findById(id: number): Promise<Role | null> {
+        return await this._role.findUnique({
             where : {
                 id : id
             }
         })
     }
-    public async delete(id: number): Promise<Group | null> {
-        return await this._group.delete({
+    public async delete(id: number): Promise<Role | null> {
+        return await this._role.delete({
             where : {
                 id : id
             }
@@ -72,21 +72,21 @@ export class GroupRepositoryImpl implements GroupRepository {
     }
 
     public async count(): Promise<number> {
-        return await this._group.count()
+        return await this._role.count()
     }
     
-    public async create(groupDto: GroupDto): Promise<Group | null> {
-        return await this._group.create({
-            data : groupDto
+    public async create(RoleDto: RoleFormDto): Promise<Role | null> {
+        return await this._role.create({
+            data : RoleDto
         })
     }
 
-    public async findAll(query: Query): Promise<Array<Group>> {
-        return await this._group.findMany();
+    public async findAll(query: Query): Promise<Array<Role>> {
+        return await this._role.findMany();
     }
 
     public async countByQuery(query: Query): Promise<number> {
-        return await this._group.count({
+        return await this._role.count({
             where : {
                 OR : [
                     {
@@ -99,12 +99,12 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Group>>> {
+    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Role>>> {
         const { page, take } = query;
         const skip: number = (page - 1) * take;
         const count: number = await this.countByQuery(query)
         const total: number = Math.ceil(count / take)
-        const data: Array<Group> = await this._group.findMany({
+        const data: Array<Role> = await this._role.findMany({
             skip: skip,
             take: take,
             where: {
@@ -125,13 +125,13 @@ export class GroupRepositoryImpl implements GroupRepository {
         };
     }
 
-    public async addAuthPermission(groupId : number, authPermission : AuthPermission) : Promise<Group | null> {
-        return await this._group.update({
+    public async addAuthPermission(RoleId : number, authPermission : Permission) : Promise<Role | null> {
+        return await this._role.update({
             where : {
-                id : groupId
+                id : RoleId
             },
             data : {
-                auth_permissions : {
+                permissions : {
                     connectOrCreate : {
                         where : {
                             id : authPermission.id
@@ -143,13 +143,13 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async removeAuthPermission(groupId: number, authPermissionId : number): Promise<Group | null> {
-        return await this._group.update({
+    public async removeAuthPermission(RoleId: number, authPermissionId : number): Promise<Role | null> {
+        return await this._role.update({
             where : {
-                id : groupId
+                id : RoleId
             },
             data : {
-                auth_permissions : {
+                permissions : {
                     disconnect : {
                         id : authPermissionId
                     }
@@ -158,10 +158,10 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async addUser(groupId: number, user : User): Promise<Group | null> {
-        return await this._group.update({
+    public async addUser(RoleId: number, user : User): Promise<Role | null> {
+        return await this._role.update({
             where : {
-                id : groupId
+                id : RoleId
             },
             data : {
                 users : {
@@ -176,10 +176,10 @@ export class GroupRepositoryImpl implements GroupRepository {
         })
     }
 
-    public async removeUser(groupId: number, userId: number): Promise<Group | null> {
-        return await this._group.update({
+    public async removeUser(RoleId: number, userId: number): Promise<Role | null> {
+        return await this._role.update({
             where : {
-                id : groupId
+                id : RoleId
             },
             data : {
                 users : {

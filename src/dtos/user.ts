@@ -1,4 +1,6 @@
+import { Role, User } from '@prisma/client';
 import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, isNotEmpty } from 'class-validator';
+import { TokenData } from '../interfaces/auth.interfaces';
 
 export class LoginUserDto {
     @IsEmail()
@@ -51,8 +53,43 @@ export class UpdateUserDto {
     public password: string = "";
 }
 
+export class UserData {
+    constructor (
+        public user: User,
+        public roles : Role[] = []
+    ) {
 
-export interface UserData  {
+    }
+
+    toUserNoPassword() : UserNoPassword {
+        return {
+            id: this.user.id,
+            first_name: this.user.first_name,
+            last_name: this.user.last_name,
+            email: this.user.email,
+            is_email_verified: this.user.is_email_verified,
+            created_at: this.user.created_at,
+            updated_at: this.user.updated_at
+        }
+    }
+
+    toUserWithToken(tokenData : TokenData) : UserWithToken {
+        return {
+            id: this.user.id,
+            first_name: this.user.first_name,
+            last_name: this.user.last_name,
+            email: this.user.email,
+            is_email_verified: this.user.is_email_verified,
+            created_at: this.user.created_at,
+            updated_at: this.user.updated_at,
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            expire_in: tokenData.expire_in
+        }
+    }
+}
+
+export interface UserNoPassword  {
     id: number | null;
     first_name: string | null;
     last_name: string | null;
@@ -62,10 +99,7 @@ export interface UserData  {
     updated_at : Date | null;
 }
 
-export interface UserWithToken {
-    first_name: string | null;
-    last_name: string | null;
-    email: string | null;
+export interface UserWithToken extends UserNoPassword{
     access_token: string;
     refresh_token: string;
     expire_in : number;

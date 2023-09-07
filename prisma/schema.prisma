@@ -20,8 +20,8 @@ model User {
   is_admin                Boolean  @default(false)
   password                String
   user_token              UserToken?
-  groups                  Group[]
-  auth_permissions        AuthPermission[]
+  roles                   Role[]
+  permissions             Permission[]
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
@@ -36,21 +36,22 @@ model UserToken {
 }
 
 
-model Group {
+model Role {
   id                Int       @id @default(autoincrement())
   name              String  
   users             User[]
-  auth_permissions  AuthPermission[]
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
+  permissions       Permission[]
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 }
 
-model AuthPermission {
+model Permission {
   id            Int       @id @default(autoincrement())
   code_name     String    @unique
   name          String    
   users         User[]
-  groups        Group[]
+  role          Role      @relation(fields : [role_id], references : [id])
+  role_id       Int
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }

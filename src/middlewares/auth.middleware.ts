@@ -10,6 +10,8 @@ import { ParsedQs } from 'qs';
 import { inject, injectable } from 'inversify';
 import prisma from '../../prisma/index';
 import { UserService, UserServiceImpl } from '../services/user.service';
+import { provide } from 'inversify-binding-decorators';
+import { UserData } from '../dtos/user';
 // import { SECRET_KEY } from '@config';
 // import { HttpException } from '@exceptions/httpException';
 // import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
@@ -39,14 +41,15 @@ export class AuthMiddleware extends BaseMiddleware {
         next: NextFunction): Promise<void> {
         try {
             const auth = getAuthorization(req);
+            console.log(auth)   
 
             if (auth) {
                 const { id } = (await verify(auth, SECRET_KEY ?? "test-1234")) as JwtPayload;
 
-                const findUser = await this._userService.findById(id) as User //users.findUnique({ where: { id: Number(id) } });
+                const findUser : UserData | null = await this._userService.findById(id) //users.findUnique({ where: { id: Number(id) } });
 
                 if (findUser) {
-                    req.user = findUser;
+                    req.userData = findUser
                     next();
                 } else {
                     next(new HttpException(401, 'Wrong authentication token'));

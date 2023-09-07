@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { AuthPermission, PrismaClient, User, Prisma } from "@prisma/client";
-import { AuthPermissionDto } from "../dtos/auth.permission";
+import { Permission, PrismaClient, User, Prisma } from "@prisma/client";
+import { PermissionFormDto, PermissionFormWithRoleDto } from "../dtos/permission";
 import { CreateRepository, DeleteRepository, Query, Repository, RetrieveRepository, UpdateRepository } from "./base";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
@@ -8,38 +8,38 @@ import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { provide } from "inversify-binding-decorators";
 
-export interface AuthPermissionRepository extends
-    CreateRepository<AuthPermissionDto, AuthPermission>,
-    RetrieveRepository<AuthPermission>,
-    UpdateRepository<AuthPermissionDto, AuthPermission, number>,
-    DeleteRepository<AuthPermission, number> {
+export interface PermissionRepository extends
+    CreateRepository<PermissionFormDto, Permission>,
+    RetrieveRepository<Permission>,
+    UpdateRepository<PermissionFormDto, Permission, number>,
+    DeleteRepository<Permission, number> {
 
-    addUser(authPermissionId: number, user: User): Promise<AuthPermission | null>
+    addUser(PermissionId: number, user: User): Promise<Permission | null>
 
-    removeUser(authPermissionId: number, userId : number): Promise<AuthPermission | null>
+    removeUser(PermissionId: number, userId : number): Promise<Permission | null>
 
     deleteByName(name: string): Promise<boolean>
 
-    countByUser(authPermissionId : number, userId : number): Promise<number>
+    countByUser(PermissionId : number, userId : number): Promise<number>
 
     countNamesByUser(names: Array<string>, userId : number): Promise<number>
 
     countCodeNamesByUser(names: Array<string>, userId : number): Promise<number>
 }
 
-@provide(AuthPermissionRepositoryImpl)
-export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
+@provide(PermissionRepositoryImpl)
+export class PermissionRepositoryImpl implements PermissionRepository {
 
-    private _authPermission : Prisma.AuthPermissionDelegate
+    private _permission : Prisma.PermissionDelegate
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient) {
-        this._authPermission = _prismaClient.authPermission
+        this._permission = _prismaClient.permission
 
     }
-    public async countByUser(authPermissionId: number, userId: number): Promise<number> {
-        return await this._authPermission.count({   
+    public async countByUser(PermissionId: number, userId: number): Promise<number> {
+        return await this._permission.count({   
             where : {
-                id : authPermissionId,
+                id : PermissionId,
                 users : {
                     some : {
                         id : userId
@@ -51,7 +51,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     
     public async countCodeNamesByUser(names: string[], userId : number): Promise<number> {
         const codeNamesQuery = names.map(e => { return { code_name: e } })
-        const count = await this._authPermission.count({
+        const count = await this._permission.count({
             where: {
                 OR: [
                     ...codeNamesQuery
@@ -68,7 +68,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
 
     public async countNamesByUser(names: string[], userId : number ): Promise<number> {
         const namesQuery = names.map(e => { return { name: e } })
-        return await this._authPermission.count({
+        return await this._permission.count({
             where: {
                 OR: [
                     ...namesQuery
@@ -83,17 +83,17 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async deleteByName(name: string): Promise<boolean> {
-        const result = await this._authPermission.deleteMany({
+        const result = await this._permission.deleteMany({
             where: {
                 name: name
             }
         })
         return result.count > 0
     }
-    public async addUser(authPermissionId: number, user: User): Promise<AuthPermission | null> {
-        return await this._authPermission.update({
+    public async addUser(PermissionId: number, user: User): Promise<Permission | null> {
+        return await this._permission.update({
             where: {
-                id: authPermissionId
+                id: PermissionId
             },
             data: {
                 users: {
@@ -109,10 +109,10 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
             }
         })
     }
-    public async removeUser(authPermissionId: number, userId : number): Promise<AuthPermission | null> {
-        return await this._authPermission.update({
+    public async removeUser(PermissionId: number, userId : number): Promise<Permission | null> {
+        return await this._permission.update({
             where: {
-                id: authPermissionId
+                id: PermissionId
             },
             data: {
                 users: {
@@ -124,14 +124,26 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         })
     }
 
-    public async create(form: AuthPermissionDto): Promise<AuthPermission | null> {
-        return await this._authPermission.create({
-            data: form
+    public async create(form: PermissionFormWithRoleDto): Promise<Permission | null> {
+        return await this._permission.create({
+            data: {
+                name: form.name,
+                code_name: form.code_name,
+                role : {
+                    connectOrCreate : {
+                        where : {
+                            id : form.role.id
+                        },
+                        create : form.role
+                    }
+                }
+            }
+
         })
     }
 
     public async countByQuery(query: Query): Promise<number> {
-        return await this._authPermission.count({
+        return await this._permission.count({
             where: {
                 OR: [
                     {
@@ -149,8 +161,8 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         })
     }
 
-    public async findAll(query: Query): Promise<AuthPermission[]> {
-        return await this._authPermission.findMany({
+    public async findAll(query: Query): Promise<Permission[]> {
+        return await this._permission.findMany({
             where: {
                 OR: [
                     {
@@ -168,12 +180,12 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         })
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<AuthPermission[]>> {
+    public async findAllPaginate(query: Query): Promise<PaginateList<Permission[]>> {
         const { page, take } = query;
         const skip: number = (page - 1) * take;
         const count: number = await this.countByQuery(query)
         const total: number = Math.ceil(count / take)
-        const data: Array<AuthPermission> = await this._authPermission.findMany({
+        const data: Array<Permission> = await this._permission.findMany({
             skip: skip,
             take: take,
             where: {
@@ -199,8 +211,8 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         };
     }
 
-    public async update(id: number, form: AuthPermissionDto): Promise<AuthPermission | null> {
-        return await this._authPermission.update({
+    public async update(id: number, form: PermissionFormDto): Promise<Permission | null> {
+        return await this._permission.update({
             where: {
                 id: id
             },
@@ -208,16 +220,16 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
         })
     }
 
-    public async findById(id: number): Promise<AuthPermission | null> {
-        return await this._authPermission.findUnique({
+    public async findById(id: number): Promise<Permission | null> {
+        return await this._permission.findUnique({
             where: {
                 id: id
             }
         })
     }
 
-    public async delete(id: number): Promise<AuthPermission | null> {
-        return await this._authPermission.delete({
+    public async delete(id: number): Promise<Permission | null> {
+        return await this._permission.delete({
             where: {
                 id: id
             }
@@ -225,7 +237,7 @@ export class AuthPermissionRepositoryImpl implements AuthPermissionRepository {
     }
 
     public async count(): Promise<number> {
-        return await this._authPermission.count();
+        return await this._permission.count();
     }
 
 }

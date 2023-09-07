@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Prisma, PrismaClient, User, UserToken } from "@prisma/client";
-import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserWithToken } from "../dtos/user";
+import { CreateUserDto, LoginUserDto, RefreshToken, RefreshTokenDto, UserData, UserNoPassword, UserWithToken } from "../dtos/user";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { UserRepository, UserRepositoryImpl } from "../repositories/user.repository";
@@ -9,7 +9,7 @@ import { HttpException } from "../exceptions/httpException";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
 import { SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
-import { createToken, renewToken, userToUserData, userToUserWithToken } from "../utils/authentication.utils";
+import { createToken, renewToken, userToUserData} from "../utils/authentication.utils";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
@@ -18,12 +18,12 @@ import { Query } from '../repositories/base';
 import { provide } from 'inversify-binding-decorators';
 
 export interface UserService {
-    verify(code: string): Promise<UserData | null>
+    verify(code: string): Promise<UserNoPassword | null>
     login(form: LoginUserDto): Promise<UserWithToken>
-    register(form: CreateUserDto): Promise<UserData | null>
+    register(form: CreateUserDto): Promise<UserNoPassword | null>
     refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null>
 
-    findAllPaginate(query: Query): Promise<PaginateList<UserData[]>>
+    findAllPaginate(query: Query): Promise<PaginateList<UserNoPassword[]>>
     findById(id: number): Promise<UserData | null>
 }
 
@@ -51,11 +51,12 @@ export class UserServiceImpl implements UserService {
         }
     }
 
-    public async verify(code: string): Promise<UserData | null> {
-        const user: User | null = await this._userRepository.findByVerifyCode(code);
+    public async verify(code: string): Promise<UserNoPassword | null> {
+        const user: UserData | null = await this._userRepository.findByVerifyCode(code);
         if (user !== null) {
-            const updateUser = await this._userRepository.verifyUser(user)
-            return userToUserData(updateUser as User);
+            const updateUser = await this._userRepository.verifyUser(user.user)
+            if(updateUser === null) return null
+            return updateUser?.toUserNoPassword()
         }
         else {
             return null
@@ -63,41 +64,43 @@ export class UserServiceImpl implements UserService {
     }
 
     public async findById(id: number): Promise<UserData | null> {
-        return await this._userRepository.findById(id)
+        const user = await this._userRepository.findById(id)
+        return user
     }
-    public async findAllPaginate(usersQuery: Query = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserData[]>> {
+    public async findAllPaginate(usersQuery: Query = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserNoPassword[]>> {
         const users = await this._userRepository.findAllPaginate(usersQuery)
         return {
             page: users.page,
             total: users.total,
-            data: users.data.map<UserData>((user) => { return userToUserData(user as User) })
+            data: users.data.map(user => user.toUserNoPassword())
         }
     }
 
     public async login(form: LoginUserDto): Promise<UserWithToken> {
-        const user = await this._userRepository.findByEmail(form.email)
+        const user : UserData | null = await this._userRepository.findByEmail(form.email)
         if (!user) throw new HttpException(409, `This email ${form.email} was not found`);
 
-        const isPasswordMatching: boolean = await compare(form.password, user.password);
+        const isPasswordMatching: boolean = await compare(form.password, user.user.password);
         if (!isPasswordMatching) throw new HttpException(409, "Password is not matching");
 
-        const tokenData = await createToken(user);
+        const tokenData = await createToken(user.user);
         // const cookie = this.createCookie(tokenData);
-        const userToken = await this._userTokenRepository.findByUser(user);
+        const userToken = await this._userTokenRepository.findByUser(user.user);
         if (userToken === null) {
-            await this._userTokenRepository.createToken(user, tokenData.refresh_token);
+            await this._userTokenRepository.createToken(user.user, tokenData.refresh_token);
         }
         else {
-            await this._userTokenRepository.updateToken(user, tokenData.refresh_token);
+            await this._userTokenRepository.updateToken(user.user, tokenData.refresh_token);
         }
-        return userToUserWithToken(user, tokenData);
+        return user.toUserWithToken(tokenData);
     }
 
-    public async register(form: CreateUserDto): Promise<UserData | null> {
+    public async register(form: CreateUserDto): Promise<UserNoPassword | null> {
         const hashPassword = await hash(form.password, 10)
         const encryptForm = { ...form, password: hashPassword, email_verification_code: createRandomNumber() }
         const newUser = await this._userRepository.create(encryptForm)
-        return userToUserData(newUser as User)
+        if(newUser === null) return null
+        return newUser?.toUserNoPassword()
     }
 
 

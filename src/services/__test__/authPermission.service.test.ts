@@ -1,12 +1,12 @@
-import { AuthPermissionRepositoryImpl } from "../../repositories/authPermission.repository"
+import { AuthPermissionRepositoryImpl } from "../../repositories/permission.repository"
 import { UserRepository, UserRepositoryImpl } from "../../repositories/user.repository"
-import { AuthPermissionService, AuthPermissionServiceImpl } from "../authPermission.service"
+import { PermissionService, AuthPermissionServiceImpl } from "../permission.service"
 
 const prisma = jestPrisma.client
 describe("Auth Permission Service", () => {
     let authPermissionRepository : AuthPermissionRepositoryImpl
     let userRepository : UserRepositoryImpl
-    let authPermissionService : AuthPermissionService
+    let authPermissionService : PermissionService
 
     beforeEach(async () => {
         authPermissionRepository = new AuthPermissionRepositoryImpl(prisma)

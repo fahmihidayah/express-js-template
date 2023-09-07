@@ -1,13 +1,13 @@
-import { AuthPermission, User } from "@prisma/client"
-import { AuthPermissionRepository, AuthPermissionRepositoryImpl } from "../authPermission.repository"
+import { Permission, User } from "@prisma/client"
+import { PermissionRepository, PermissionRepositoryImpl } from "../permission.repository"
 import { after } from "node:test"
 
 const prisma = jestPrisma.client
 
 describe('Auth Permission Repository', () => {
-    let authPermission : AuthPermission
+    let authPermission : Permission
     let user : User
-    let authPermissionRepository : AuthPermissionRepository
+    let authPermissionRepository : PermissionRepository
 
     beforeEach(async () => {
         user = await prisma.user.create({   

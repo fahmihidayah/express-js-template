@@ -1,11 +1,11 @@
 import { User } from "@prisma/client";
-import { UserData, UserWithToken } from "../dtos/user";
+import { UserNoPassword, UserWithToken } from "../dtos/user";
 import { DataStoredInToken, TokenData } from "../interfaces/auth.interfaces";
 import { REFRESH_SECRET_KEY, SECRET_KEY } from "../config";
 import { sign } from "jsonwebtoken";
 
 
-export const userToUserData = (e : User) : UserData => {
+export const userToUserData = (e : User) : UserNoPassword => {
     return {id: e.id,
         first_name: e.first_name,
         last_name : e.last_name,
@@ -15,14 +15,14 @@ export const userToUserData = (e : User) : UserData => {
         updated_at: e.updated_at}
 }
 
-export function userToUserWithToken(user : UserData, tokenData : TokenData) : UserWithToken {
-    return {
-        first_name: user.first_name,
-        last_name : user.last_name,
-        email: user.email,
-        ... tokenData
-    }
-}
+// export function userToUserWithToken(user : UserNoPassword, tokenData : TokenData) : UserWithToken {
+//     return {
+//         first_name: user.first_name,
+//         last_name : user.last_name,
+//         email: user.email,
+//         ... tokenData
+//     }
+// }
 
 export function createToken(user:User): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };

@@ -9,13 +9,9 @@ import {
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
 import { UserService, UserServiceImpl } from "../services/user.service";
-import { SECRET_KEY } from "../config";
-import { CreateUserDto, UserData } from "../dtos/user";
-import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
-import { ValidationMiddleware } from "../middlewares/validation";
-import { TYPE_MIDDLEWARE } from "../middlewares";
 import { RequestWithUser } from "../interfaces/auth.interfaces";
-import { PaginateList } from "../dtos";
+import { LoginUserValidationMiddleware, CreateUserValidationMiddleware, RefreshTokenValidationMiddleware } from '../validations/user';
+import { TYPE_MIDDLEWARE } from '../middlewares';
 
 
 @controller("/users")
@@ -77,9 +73,10 @@ export class UserController extends BaseHttpController {
         })
     }
 
-    @httpPost("/login", TYPE_MIDDLWARE_VALIDATION.LoginValidationMiddleware)
+    @httpPost("/login", LoginUserValidationMiddleware)
     public async login (@request() request : express.Request) {
         const userDto = {... request.body}
+        console.log(userDto)
         const userToken = await this._userService.login(userDto)
         return this.json({
             message : "Login Success",
@@ -89,7 +86,7 @@ export class UserController extends BaseHttpController {
         })
     }
 
-    @httpPost("/refreshToken", TYPE_MIDDLWARE_VALIDATION.RefreshTokenValidationMiddleware)
+    @httpPost("/refreshToken", RefreshTokenValidationMiddleware)
     public async refreshToken() {
         const refreshToken = {... this.httpContext.request.body}
         const token = await this._userService.refreshToken(refreshToken)
@@ -113,7 +110,7 @@ export class UserController extends BaseHttpController {
         
     }
 
-    @httpPost("/register/admin", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
+    @httpPost("/register/admin", CreateUserValidationMiddleware)
     public async registerAdmin(@request() request : express.Request) {
         const userDto = {... request.body, is_admin : true}
         const user = await this._userService.register(userDto)
@@ -125,7 +122,7 @@ export class UserController extends BaseHttpController {
         })
     }
 
-    @httpPost("/register", TYPE_MIDDLWARE_VALIDATION.RegisterValidationMiddleware )
+    @httpPost("/register", CreateUserValidationMiddleware)
     public async register(@request() request : express.Request) {
         const userDto = {... request.body}
         const user = await this._userService.register(userDto)
@@ -139,20 +136,12 @@ export class UserController extends BaseHttpController {
 
     @httpGet("/profile", TYPE_MIDDLEWARE.AuthMiddleware) 
     public async getProfile(@request() request : RequestWithUser) {
-        const user = {
-            id : request.user.id,
-            first_name : request.user.first_name,
-            last_name : request.user.last_name,
-            email : request.user.email,
-            created_at : request.user.created_at,
-            updated_at : request.user.updated_at
-        }
-
+       
         return this.json({
             message : "Get Profile Success",
             code : 200,
             error : false,
-            data : user
+            data : request.userData.toUserNoPassword()
         })
     }
 

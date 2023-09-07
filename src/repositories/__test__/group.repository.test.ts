@@ -1,5 +1,5 @@
 import { Group, User } from "@prisma/client"
-import { GroupRepository, GroupRepositoryImpl } from "../group.repository"
+import { GroupRepository, GroupRepositoryImpl } from "../role.repository"
 
 const prisma = jestPrisma.client
 

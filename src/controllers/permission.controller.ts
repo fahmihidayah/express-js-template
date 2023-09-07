@@ -8,21 +8,21 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
-import { AuthPermissionDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/auth.permission";
-import { AuthPermissionService, AuthPermissionServiceImpl } from "../services/authPermission.service";
-import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
+import { PermissionFormDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/permission";
+import { PermissionService, PermissionServiceImpl } from "../services/permission.service";
+// import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/auth_permissions")
 export class AuthPermissionController extends BaseHttpController {
-    private _authPermissionService: AuthPermissionService
+    private _authPermissionService: PermissionService
     constructor(
-        authPermissionService: AuthPermissionServiceImpl
+        authPermissionService: PermissionServiceImpl
     ) {
         super()
         this._authPermissionService = authPermissionService
     }
 
-    @httpPost("/:id/add_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware)
+    @httpPost("/:id/add_user")
     public async addUser() {
         const params = this.httpContext.request.params;
         const body: AuthPermissionWithUser = this.httpContext.request.body
@@ -34,7 +34,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPost("/:id/remove_user", TYPE_MIDDLWARE_VALIDATION.AuthPermissionWithUserValidationMiddleware)
+    @httpPost("/:id/remove_user")
     public async removeUser() {
         const params = this.httpContext.request.params;
         const body: AuthPermissionWithUser = this.httpContext.request.body
@@ -64,7 +64,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPost("/create_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
+    @httpPost("/create_name")
     public async createName() {
         const form: AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.createFromName(form);
@@ -75,7 +75,7 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpDelete("/delete_name", TYPE_MIDDLWARE_VALIDATION.AuthPermissionNameValidationMiddleware)
+    @httpDelete("/delete_name")
     public async deleteName() {
         const form: AuthPermissionNameDto = this.httpContext.request.body;
         const data = await this._authPermissionService.deleteByName(form.name);
@@ -86,9 +86,9 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPost("/", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
+    @httpPost("/")
     public async create() {
-        const form: AuthPermissionDto = this.httpContext.request.body;
+        const form: PermissionFormDto = this.httpContext.request.body;
         const data = await this._authPermissionService.create(form)
         return this.json({
             message: "Success created auth permission",
@@ -107,10 +107,10 @@ export class AuthPermissionController extends BaseHttpController {
         })
     }
 
-    @httpPut("/:id", TYPE_MIDDLWARE_VALIDATION.AuthPermissionValidationMiddleware)
+    @httpPut("/:id")
     public async update() {
         const id = this.httpContext.request.params.id
-        const form: AuthPermissionDto = this.httpContext.request.body;
+        const form: PermissionFormDto = this.httpContext.request.body;
         const data = await this._authPermissionService.update(Number(id), form)
         return this.json({
             message: "Success retrieve auth permission",

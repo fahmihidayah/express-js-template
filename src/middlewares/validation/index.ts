@@ -15,6 +15,28 @@ import { ParsedQs } from 'qs';
  * @param forbidNonWhitelisted If you would rather to have an error thrown when any non-whitelisted properties are present
  */
 
+export abstract class BaseValidationMiddleware extends BaseMiddleware {
+  
+  abstract _type : any
+  abstract _skipMissingProperties : boolean
+  abstract _whitelist : boolean
+  abstract _forbidNonWhitelisted : boolean
+
+
+  handler(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction): void {
+    const dto = plainToInstance(this._type, req.body);
+    
+    validateOrReject(dto, { })
+      .then(() => {
+        req.body = dto;
+        next();
+      })
+      .catch((errors: ValidationError[]) => {
+        const message = errors.map((error: ValidationError) => Object.values(error.constraints??"Error unknown")).join(', ');
+        next(new HttpException(400, message));
+      });
+  }
+}
 
 export class ValidationMiddleware extends BaseMiddleware {
 
