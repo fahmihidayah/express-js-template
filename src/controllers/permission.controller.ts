@@ -10,10 +10,11 @@ import {
 } from "inversify-express-utils";
 import { PermissionFormDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/permission";
 import { PermissionService, PermissionServiceImpl } from "../services/permission.service";
+import { BaseAppController } from './app.controller';
 // import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/auth_permissions")
-export class AuthPermissionController extends BaseHttpController {
+export class AuthPermissionController extends BaseAppController {
     private _authPermissionService: PermissionService
     constructor(
         authPermissionService: PermissionServiceImpl
@@ -50,13 +51,7 @@ export class AuthPermissionController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        const query = this.httpContext.request.query
-        const page = Number(query.page ?? "1")
-        const take = Number(query.take ?? "5")
-        const orderBy = ( query.order_by ?? "id") as string
-        const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
-        const keyword = (query.keyword??"") as string
-        const result = await this._authPermissionService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
+        const result = await this._authPermissionService.findAllPaginate(this.getQuery())
         return this.json({
             message: "Success load auth permission",
             status: 200,

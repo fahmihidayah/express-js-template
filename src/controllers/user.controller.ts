@@ -12,10 +12,11 @@ import { UserService, UserServiceImpl } from "../services/user.service";
 import { RequestWithUser } from "../interfaces/auth.interfaces";
 import { LoginUserValidationMiddleware, CreateUserValidationMiddleware, RefreshTokenValidationMiddleware } from '../validations/user';
 import { TYPE_MIDDLEWARE } from '../middlewares';
+import { BaseAppController } from './app.controller';
 
 
 @controller("/users")
-export class UserController extends BaseHttpController {   
+export class UserController extends BaseAppController {   
     private _userService : UserService
     constructor(
         userService : UserServiceImpl
@@ -26,13 +27,8 @@ export class UserController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        const query = this.httpContext.request.query
-        const page = Number(query.page ?? "1")
-        const take = Number(query.take ?? "5")
-        const orderBy = ( query.order_by ?? "id") as string
-        const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
-        const keyword = (query.keyword??"") as string
-        const result = await this._userService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
+        
+        const result = await this._userService.findAllPaginate(this.getQuery())
         return this.json({
             message: "Success load users",
             status: 200,

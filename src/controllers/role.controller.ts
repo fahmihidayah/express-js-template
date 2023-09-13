@@ -10,9 +10,10 @@ import {
 } from "inversify-express-utils";
 import { RoleService, RoleServiceImpl } from "../services/role.service";
 import { GroupWithAuthPermission, RoleWithUser } from "../dtos/role";
+import { BaseAppController } from './app.controller';
 
 @controller("/groups")
-export class RoleController extends BaseHttpController {
+export class RoleController extends BaseAppController {
     private _roleService: RoleService
     constructor(
         RoleService: RoleServiceImpl) {
@@ -71,13 +72,7 @@ export class RoleController extends BaseHttpController {
 
     @httpGet("/")
     public async index() {
-        const query = this.httpContext.request.query
-        const page = Number(query.page ?? "1")
-        const take = Number(query.take ?? "5")
-        const orderBy = ( query.order_by ?? "id") as string
-        const orderByDirection = (query.order_type ?? "asc") as "asc" | "desc"
-        const keyword = (query.keyword??"") as string
-        const result = await this._roleService.findAllPaginate({page, take, keyword, orderBy, orderByDirection})
+        const result = await this._roleService.findAllPaginate(this.getQuery())
         return this.json({
             message: "Success load group",
             status: 200,
