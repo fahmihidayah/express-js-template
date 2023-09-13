@@ -6,15 +6,17 @@ import {
     controller,
     httpDelete,
     httpGet,
+    httpPatch,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
 import { TaskServiceImpl } from '../services/task.service';
-import { Query } from '../repositories/base';
+import { BaseQuery } from '../repositories/base';
 import { TaskFormDto } from '../dtos/task';
+import { BaseAppController } from './app.controller';
 
 
 @controller("/tasks")
-export class TaskController extends BaseHttpController {
+export class TaskController extends BaseAppController {
 
     constructor(
         private _taskService : TaskServiceImpl
@@ -24,14 +26,7 @@ export class TaskController extends BaseHttpController {
 
     @httpGet("/")
     public async findAll() {
-        
-        const query : Query = new Query(
-            Number(this.httpContext.request.query.page ?? "1"),
-            Number(this.httpContext.request.query.take ?? "10"),
-            String(this.httpContext.request.query.keyword ?? ""),
-            String(this.httpContext.request.query.orderBy ?? "id"),
-            String(this.httpContext.request.query.orderByDirection ?? "asc")
-        )
+        const query : BaseQuery = this.getQuery()
         return this.json({
             message: "Success get all tasks",
             status: 200,
@@ -78,7 +73,7 @@ export class TaskController extends BaseHttpController {
         })
     }
 
-    @httpPut("/:id")
+    @httpPatch("/:id")
     public async update() {
         const params = this.httpContext.request.params;
         const body : TaskFormDto = this.httpContext.request.body;

@@ -1,6 +1,6 @@
 import { Permission, User } from "@prisma/client"
 import { PermissionFormDto, AuthPermissionNameDto } from "../dtos/permission"
-import { Query } from "../repositories/base"
+import { BaseQuery } from "../repositories/base"
 import { PaginateList } from "../dtos"
 import { inject, injectable } from "inversify"
 import { PermissionRepository, PermissionRepositoryImpl } from "../repositories/permission.repository"
@@ -16,7 +16,7 @@ export interface PermissionService {
 
     create(form: PermissionFormDto): Promise<Permission | null>
 
-    findAllPaginate(query: Query): Promise<PaginateList<Array<Permission>>>
+    findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Permission>>>
 
     update(id : number, form : PermissionFormDto): Promise<Permission | null>
 
@@ -96,7 +96,7 @@ export class PermissionServiceImpl implements PermissionService {
         return await this._PermissionRepository.create(form)
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Permission[]>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Permission[]>> {
         return await this._PermissionRepository.findAllPaginate(query)
     }
 

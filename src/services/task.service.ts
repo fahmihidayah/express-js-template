@@ -1,16 +1,17 @@
 import { Task } from "@prisma/client";
 import { PaginateList } from "../dtos";
 import { TaskData, TaskFormDto } from "../dtos/task";
-import { Query } from "../repositories/base";
+import { BaseQuery } from "../repositories/base";
 import { provide } from "inversify-binding-decorators";
 import { TaskRepositoryImpl } from "../repositories/task.repository";
 
 export interface TaskService {
-    findAllPaginate(query: Query): Promise<PaginateList<Array<Task>>>
+    findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Task>>>
     create(form: TaskFormDto): Promise<TaskData | null>
     update(id: number, form: TaskFormDto): Promise<TaskData | null>
     findById(id: number): Promise<TaskData | null>
     delete(id: number): Promise<TaskData | null>
+    findByIds(ids: number[]): Promise<Task[]>
 }
 
 @provide(TaskServiceImpl)
@@ -23,12 +24,14 @@ export class TaskServiceImpl implements TaskService {
     }
 
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Task>>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Task>>> {
+        
         const paginateList = await this._taskRepository.findAllPaginate(query);
         return {
             data: paginateList.data.map(task => task.task),
             page: query.page,
-            total: paginateList.total
+            total: paginateList.total,
+            count : paginateList.count
         }
     }
 
@@ -46,6 +49,10 @@ export class TaskServiceImpl implements TaskService {
 
     public async delete(id: number): Promise<TaskData | null> {
         return await this._taskRepository.delete(id);
+    }
+
+    public async findByIds(ids: number[]): Promise<Task[]> {
+        return await this._taskRepository.findByIds(ids);
     }
 
 }

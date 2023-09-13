@@ -1,6 +1,6 @@
 import { provide } from "inversify-binding-decorators";
 import { TaskData, TaskFormDto } from "../dtos/task";
-import { CreateRepository, DeleteRepository, Query, RetrieveRepository, UpdateRepository, createQueryAction } from "./base";
+import { CountRepository, CreateRepository, DeleteRepository, BaseQuery, RetrieveRepository, UpdateRepository, createQueryAction } from "./base";
 import { inject } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { Prisma, PrismaClient, Task } from "@prisma/client";
@@ -8,9 +8,12 @@ import { PaginateList } from "../dtos";
 
 export interface TaskRepository extends
     CreateRepository<TaskFormDto, TaskData>,
+    CountRepository<Task>,
     RetrieveRepository<TaskData>,
     UpdateRepository<TaskFormDto, TaskData, number>,
-    DeleteRepository<TaskData, number> {
+    DeleteRepository<TaskData, number>{
+
+    findByIds(ids: number[]): Promise<Task[]>   
 }
 
 @provide(TaskRepositoryImpl)
@@ -36,7 +39,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         return new TaskData(task);
     }
 
-    public async findAll(query: any): Promise<TaskData[]> {
+    public async findAll(query: BaseQuery): Promise<TaskData[]> {
         const tasks = await this.taskDelegate.findMany({
             skip: query.page * query.take,
             take: query.take,
@@ -48,7 +51,7 @@ export class TaskRepositoryImpl implements TaskRepository {
         return tasks.map(task => new TaskData(task));
     }
 
-    public async countByQuery(query: Query): Promise<number> {
+    public async countByQuery(query: BaseQuery): Promise<number> {
         return await this.taskDelegate.count({
             where: {
                 title: {
@@ -74,18 +77,19 @@ export class TaskRepositoryImpl implements TaskRepository {
         return new TaskData(task);
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<TaskData[]>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<TaskData[]>> {
         const queryaAction = await createQueryAction<TaskData>(query, this);
         console.log(queryaAction)
         const tasks = await this.taskDelegate.findMany({
             skip: queryaAction.skip,
-            take: query.take,
+            take: queryaAction.take,
             orderBy: {
                 [query.orderBy]: query.orderByDirection
             }
         });
 
         return {
+            count : queryaAction.count,
             page: query.page,
             total: queryaAction.total,
             data: tasks.map(task => new TaskData(task))
@@ -117,4 +121,16 @@ export class TaskRepositoryImpl implements TaskRepository {
 
         return new TaskData(task);
     }
+
+    public async findByIds(ids: number[]): Promise<Task[]> {
+        const task = await this.taskDelegate.findMany({
+            where : {
+                id : {
+                    in : ids
+                }
+            }
+        })
+        return task;
+    }
+
 }

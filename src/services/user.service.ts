@@ -14,7 +14,7 @@ import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
 import { createRandomNumber } from "../utils/string.utils";
 import { UserTokenRepository, UserTokenRepositoryImpl } from "../repositories/userToken.repository";
-import { Query } from '../repositories/base';
+import { BaseQuery } from '../repositories/base';
 import { provide } from 'inversify-binding-decorators';
 
 export interface UserService {
@@ -23,7 +23,7 @@ export interface UserService {
     register(form: CreateUserDto): Promise<UserNoPassword | null>
     refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null>
 
-    findAllPaginate(query: Query): Promise<PaginateList<UserNoPassword[]>>
+    findAllPaginate(query: BaseQuery): Promise<PaginateList<UserNoPassword[]>>
     findById(id: number): Promise<UserData | null>
 }
 
@@ -67,7 +67,7 @@ export class UserServiceImpl implements UserService {
         const user = await this._userRepository.findById(id)
         return user
     }
-    public async findAllPaginate(usersQuery: Query = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserNoPassword[]>> {
+    public async findAllPaginate(usersQuery: BaseQuery = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserNoPassword[]>> {
         const users = await this._userRepository.findAllPaginate(usersQuery)
         return {
             page: users.page,

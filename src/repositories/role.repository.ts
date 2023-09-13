@@ -4,7 +4,7 @@ import { TYPE_PRISMA } from "../modules/prisma.container";
 import { PrismaClient, Role, Permission, User, Prisma } from "@prisma/client";
 import { RoleFormDto } from "../dtos/role";
 import { GetResult } from "@prisma/client/runtime/library";
-import { CreateRepository, DeleteRepository, Query, Repository, RetrieveRepository, UpdateRepository } from "./base";
+import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository } from "./base";
 import { PaginateList } from "../dtos";
 import { provide } from "inversify-binding-decorators";
 
@@ -81,11 +81,11 @@ export class RoleRepositoryImpl implements RoleRepository {
         })
     }
 
-    public async findAll(query: Query): Promise<Array<Role>> {
+    public async findAll(query: BaseQuery): Promise<Array<Role>> {
         return await this._role.findMany();
     }
 
-    public async countByQuery(query: Query): Promise<number> {
+    public async countByQuery(query: BaseQuery): Promise<number> {
         return await this._role.count({
             where : {
                 OR : [
@@ -99,7 +99,7 @@ export class RoleRepositoryImpl implements RoleRepository {
         })
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Role>>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Role>>> {
         const { page, take } = query;
         const skip: number = (page - 1) * take;
         const count: number = await this.countByQuery(query)
@@ -121,7 +121,8 @@ export class RoleRepositoryImpl implements RoleRepository {
         return {
             page: page,
             total: total,
-            data: data
+            data: data,
+            count : count
         };
     }
 

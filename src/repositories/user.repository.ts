@@ -5,7 +5,7 @@ import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
-import { CreateRepository, DeleteRepository, Query, RetrieveRepository, UpdateRepository } from './base';
+import { CreateRepository, DeleteRepository, BaseQuery, RetrieveRepository, UpdateRepository } from './base';
 import { provide } from 'inversify-binding-decorators';
 
 export interface UserRepository extends RetrieveRepository<UserData>,
@@ -45,7 +45,7 @@ export class UserRepositoryImpl implements UserRepository {
         return await this._user.count();
     }
 
-    public async countByQuery(query: Query): Promise<number> {
+    public async countByQuery(query: BaseQuery): Promise<number> {
         return await this._user.count({
             where: {
                 OR: [
@@ -155,7 +155,7 @@ export class UserRepositoryImpl implements UserRepository {
         return new UserData(userResult)
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<UserData[]>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<UserData[]>> {
         const { page, take } = query;
         const skip: number = (page - 1) * take;
         const count: number = await this.countByQuery(query)
@@ -186,13 +186,14 @@ export class UserRepositoryImpl implements UserRepository {
         })
 
         return {
+            count : count,
             page: page,
             total: total,
             data: data.map((user) => new UserData(user))
         };
     }
 
-    public async findAll(query: Query): Promise<Array<UserData>> {
+    public async findAll(query: BaseQuery): Promise<Array<UserData>> {
         const users = await this._user.findMany({
             where: {
                 OR: [

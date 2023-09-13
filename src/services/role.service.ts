@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import { GetResult } from "@prisma/client/runtime/library";
 import { RoleRepository, RoleRepositoryImpl } from '../repositories/role.repository';
 import { RoleFormDto } from '../dtos/role';
-import { Query } from '../repositories/base';
+import { BaseQuery } from '../repositories/base';
 import { Permission, Role, User } from '@prisma/client';
 import { PaginateList } from '../dtos';
 import { UserRepository, UserRepositoryImpl } from '../repositories/user.repository';
@@ -13,7 +13,7 @@ import { provide } from 'inversify-binding-decorators';
 export interface RoleService {
     create(RoleDto : RoleFormDto) : Promise<Role | null>
 
-    findAllPaginate(query : Query) : Promise<PaginateList<Array<Role>>>
+    findAllPaginate(query : BaseQuery) : Promise<PaginateList<Array<Role>>>
 
     delete(id : number) : Promise<Role | null>
 
@@ -79,7 +79,7 @@ export class RoleServiceImpl implements RoleService {
         return await this._RoleRepository.create(RoleDto)
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Array<Role>>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Role>>> {
         return await this._RoleRepository.findAllPaginate(query)
     }
 

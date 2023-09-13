@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Permission, PrismaClient, User, Prisma } from "@prisma/client";
 import { PermissionFormDto, PermissionFormWithRoleDto } from "../dtos/permission";
-import { CreateRepository, DeleteRepository, Query, Repository, RetrieveRepository, UpdateRepository } from "./base";
+import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository } from "./base";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
@@ -142,7 +142,7 @@ export class PermissionRepositoryImpl implements PermissionRepository {
         })
     }
 
-    public async countByQuery(query: Query): Promise<number> {
+    public async countByQuery(query: BaseQuery): Promise<number> {
         return await this._permission.count({
             where: {
                 OR: [
@@ -161,7 +161,7 @@ export class PermissionRepositoryImpl implements PermissionRepository {
         })
     }
 
-    public async findAll(query: Query): Promise<Permission[]> {
+    public async findAll(query: BaseQuery): Promise<Permission[]> {
         return await this._permission.findMany({
             where: {
                 OR: [
@@ -180,7 +180,7 @@ export class PermissionRepositoryImpl implements PermissionRepository {
         })
     }
 
-    public async findAllPaginate(query: Query): Promise<PaginateList<Permission[]>> {
+    public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Permission[]>> {
         const { page, take } = query;
         const skip: number = (page - 1) * take;
         const count: number = await this.countByQuery(query)
@@ -205,6 +205,7 @@ export class PermissionRepositoryImpl implements PermissionRepository {
         })
 
         return {
+            count: count,
             page: page,
             total: total,
             data: data
