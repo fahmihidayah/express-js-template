@@ -5,6 +5,7 @@ import { inject } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { Prisma, PrismaClient, Task } from "@prisma/client";
 import { PaginateList } from "../dtos";
+import { title } from "process";
 
 export interface TaskRepository extends
     CreateRepository<TaskFormDto, TaskData>,
@@ -79,13 +80,26 @@ export class TaskRepositoryImpl implements TaskRepository {
 
     public async findAllPaginate(query: BaseQuery): Promise<PaginateList<TaskData[]>> {
         const queryaAction = await createQueryAction<TaskData>(query, this);
-        console.log(queryaAction)
+        const whereStatement : Prisma.TaskWhereInput[] = []
+
+        query.extraQueries.forEach((value, key) => {
+            whereStatement.push({
+                [String(key)] : {
+                    contains : value
+                }
+            })
+        })
+
+        const taskWhereInput : Prisma.TaskWhereInput | undefined = whereStatement.length > 0 ? {
+            OR : whereStatement} : undefined
+
         const tasks = await this.taskDelegate.findMany({
             skip: queryaAction.skip,
             take: queryaAction.take,
             orderBy: {
-                [query.orderBy]: query.orderByDirection
-            }
+                [queryaAction.sort]: queryaAction.order
+            },
+            where : taskWhereInput
         });
 
         return {

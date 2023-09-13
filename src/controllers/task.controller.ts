@@ -13,6 +13,7 @@ import { TaskServiceImpl } from '../services/task.service';
 import { BaseQuery } from '../repositories/base';
 import { TaskFormDto } from '../dtos/task';
 import { BaseAppController } from './app.controller';
+import { stringify } from 'querystring';
 
 
 @controller("/tasks")
@@ -24,6 +25,22 @@ export class TaskController extends BaseAppController {
         super()
     }
 
+    public getQuery() : BaseQuery {
+        const baseQuery : BaseQuery = super.getQuery()
+        const desc = this.httpContext.request.query.description_like ?? ""
+        const title = this.httpContext.request.query.title_like ?? ""
+        if(desc !== "") {
+            baseQuery.extraQueries.set( "description", String(desc))
+        }
+
+        if(title !== "") {
+            baseQuery.extraQueries.set( "title", String(title))
+        }
+
+        
+        console.log(baseQuery.extraQueries)
+        return baseQuery
+    }
     @httpGet("/")
     public async findAll() {
         const query : BaseQuery = this.getQuery()

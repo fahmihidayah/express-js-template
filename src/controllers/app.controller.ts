@@ -22,7 +22,9 @@ export class BaseAppController extends BaseHttpController {
             String(this.httpContext.request.query.orderByDirection ?? "asc"),
             Number(this.httpContext.request.query._start ?? "0"),
             Number(this.httpContext.request.query._end ?? "5"),
-            this.httpContext.request.headers['format'] === 'admin'
+            this.httpContext.request.headers['format'] === 'admin',
+            String(this.httpContext.request.query._sort ?? "id"),
+            String(this.httpContext.request.query._order ?? "asc"),
         )
         return query
     }

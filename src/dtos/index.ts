@@ -11,6 +11,7 @@ export interface PaginateResponse<T> extends BaseResponse<T> {
 }
 
 export interface PaginateList<T>  {
+    count : number;
     page : number;
     total : number;
     data : T

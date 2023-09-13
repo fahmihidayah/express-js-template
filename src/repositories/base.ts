@@ -3,6 +3,8 @@ import { request } from 'express';
 
 
 export class BaseQuery {
+    public extraQueries : Map<String, String> = new Map<String, String>()
+
     constructor(
         public page: number,
         public take: number,
@@ -12,8 +14,9 @@ export class BaseQuery {
         public _start: number = 0,
         public _end: number = 10,
         public isAdmin: boolean = false,
+        public _sort: string = "id",
+        public _order: string = "asc",
         public id: number[] = []) {
-
     }
 }
 
@@ -27,7 +30,9 @@ export async function createQueryAction<T>(query: BaseQuery, repository: CountRe
             skip: skip,
             take: query.take,
             total: total,
-            count: count
+            count: count,
+            sort : query.orderBy,
+            order : query.orderByDirection
         }
     }
     else {
@@ -39,7 +44,9 @@ export async function createQueryAction<T>(query: BaseQuery, repository: CountRe
             skip: skip,
             take: take,
             total: total,
-            count: count
+            count: count,
+            sort : query._sort,
+            order : query._order
         }
     }
 }
@@ -49,6 +56,8 @@ export interface QueryAction {
     take: number;
     total: number;
     count: number;
+    sort : string;
+    order : string;
 }
 
 export interface Repository<F, T, I> {
