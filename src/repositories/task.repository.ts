@@ -1,5 +1,5 @@
 import { provide } from "inversify-binding-decorators";
-import { TaskData, TaskFormDto } from "../dtos/task";
+import { TaskData, TaskFormDto, TaskWithCategoryFormDto } from "../dtos/task";
 import { CountRepository, CreateRepository, DeleteRepository, BaseQuery, RetrieveRepository, UpdateRepository, createQueryAction } from "./base";
 import { inject } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
@@ -8,7 +8,7 @@ import { PaginateList } from "../dtos";
 import { title } from "process";
 
 export interface TaskRepository extends
-    CreateRepository<TaskFormDto, TaskData>,
+    CreateRepository<TaskWithCategoryFormDto, TaskData>,
     CountRepository<Task>,
     RetrieveRepository<TaskData>,
     UpdateRepository<TaskFormDto, TaskData, number>,
@@ -28,12 +28,18 @@ export class TaskRepositoryImpl implements TaskRepository {
         this.taskDelegate = this._prisma.task;
     }
 
-    public async create(form: TaskFormDto): Promise<TaskData | null> {
+    public async create(form: TaskWithCategoryFormDto): Promise<TaskData | null> {
         const task = await this.taskDelegate.create({
             data: {
                 title: form.title,
                 description: form.description,
-                completed: form.completed
+                completed: form.completed,
+                category: {
+                    connect: form.category
+                }
+            },
+            include: {
+                category: true
             }
         });
 

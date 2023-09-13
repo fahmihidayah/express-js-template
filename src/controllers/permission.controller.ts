@@ -8,9 +8,10 @@ import {
     httpGet,
     httpPost, httpPut, interfaces, next, request, requestBody, requestParam, response
 } from "inversify-express-utils";
+import { BaseAppController } from './app.controller';
+
 import { PermissionFormDto, AuthPermissionNameDto, AuthPermissionWithUser } from "../dtos/permission";
 import { PermissionService, PermissionServiceImpl } from "../services/permission.service";
-import { BaseAppController } from './app.controller';
 // import { TYPE_MIDDLWARE_VALIDATION } from "../modules/validation.middleware.module";
 
 @controller("/auth_permissions")

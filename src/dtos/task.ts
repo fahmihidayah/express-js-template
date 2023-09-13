@@ -1,4 +1,4 @@
-import { Task } from "@prisma/client";
+import { Category, Task } from "@prisma/client";
 import { IsNotEmpty } from "class-validator";
 
 export class TaskFormDto {
@@ -8,6 +8,14 @@ export class TaskFormDto {
     description: string = ""
 
     completed: boolean = false;
+}
+
+export class TaskWithCategoryFormDto extends TaskFormDto{
+    constructor(
+        public category : Category
+    ) {
+        super();
+    }
 }
 
 export class TaskData {

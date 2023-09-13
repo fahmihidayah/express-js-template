@@ -10,6 +10,7 @@ import "./controllers/user.controller";
 import "./controllers/role.controller";
 import "./controllers/permission.controller";
 import "./controllers/task.controller";
+import "./controllers/category.controller";
 import { Container } from 'inversify';
 import { interfaces, InversifyExpressServer, TYPE } from 'inversify-express-utils';
 import { CREDENTIALS, LOG_FORMAT, NODE_ENV, ORIGIN, PORT } from './config';
