@@ -82,6 +82,27 @@ export class UserController extends BaseAppController {
         })
     }
 
+    @httpPost("/logout", TYPE_MIDDLEWARE.AuthMiddleware)
+    public async logout(@request() request : RequestWithUser) {
+        const result = await this._userService.logout(request.userData)
+        if(result) {
+            return this.json({
+                message : "Logout Success",
+                code : 200,
+                error : false,
+                data : null
+            })
+        }
+        else {
+            return this.json({
+                message : "Logout Failed",
+                code : 500,
+                error : true,
+                data : null
+            }, 500)
+        }
+    }
+
     @httpPost("/refreshToken", RefreshTokenValidationMiddleware)
     public async refreshToken() {
         const refreshToken = {... this.httpContext.request.body}

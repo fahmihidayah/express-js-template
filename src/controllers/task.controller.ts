@@ -14,9 +14,11 @@ import { BaseQuery } from '../repositories/base';
 import { TaskFormDto } from '../dtos/task';
 import { BaseAppController } from './app.controller';
 import { stringify } from 'querystring';
+import { TYPE_MIDDLEWARE } from '../middlewares';
+import { RequestWithUser } from '../interfaces/auth.interfaces';
 
 
-@controller("/tasks")
+@controller("/tasks", TYPE_MIDDLEWARE.AuthMiddleware)
 export class TaskController extends BaseAppController {
 
     constructor(
@@ -42,8 +44,9 @@ export class TaskController extends BaseAppController {
         return baseQuery
     }
     @httpGet("/")
-    public async findAll() {
+    public async findAll(@request() requestWithUser : RequestWithUser) {
         const query : BaseQuery = this.getQuery()
+        console.log(requestWithUser.userData.user)
         return this.json({
             message: "Success get all tasks",
             status: 200,
@@ -74,8 +77,10 @@ export class TaskController extends BaseAppController {
         const body : TaskFormDto = {
             title: this.httpContext.request.body.title,
             description: this.httpContext.request.body.description,
-            completed : false
+            completed : false,
+            category_id : this.httpContext.request.body.category_id ?? "1"
         }
+        
         const task = await this._taskService.create(body)
         if(task === null) return this.json({
             message: "Failed create task",

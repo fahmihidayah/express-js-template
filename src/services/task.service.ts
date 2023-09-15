@@ -4,6 +4,7 @@ import { TaskData, TaskFormDto } from "../dtos/task";
 import { BaseQuery } from "../repositories/base";
 import { provide } from "inversify-binding-decorators";
 import { TaskRepositoryImpl } from "../repositories/task.repository";
+import { CategoryRepositoryImpl } from "../repositories/category.repository";
 
 export interface TaskService {
     findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Task>>>
@@ -18,7 +19,8 @@ export interface TaskService {
 export class TaskServiceImpl implements TaskService {
 
     constructor(
-        private _taskRepository: TaskRepositoryImpl
+        private _taskRepository: TaskRepositoryImpl,
+        private _categoryRepository: CategoryRepositoryImpl
     ) {
 
     }
@@ -36,7 +38,15 @@ export class TaskServiceImpl implements TaskService {
     }
 
     public async create(form: TaskFormDto): Promise<TaskData | null> {
-        return await this._taskRepository.create(form);
+        const category = await this._categoryRepository.findById(Number(form.category_id));
+
+        return await this._taskRepository.create({
+            title: form.title,
+            description: form.description,
+            completed: form.completed,
+            category_id : form.category_id,
+            category : category?.category!
+        });
     }
 
     public async update(id: number, form: TaskFormDto): Promise<TaskData | null> {

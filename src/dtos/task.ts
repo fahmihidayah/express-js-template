@@ -8,6 +8,9 @@ export class TaskFormDto {
     description: string = ""
 
     completed: boolean = false;
+
+    @IsNotEmpty()
+    category_id: string = "1"
 }
 
 export class TaskWithCategoryFormDto extends TaskFormDto{

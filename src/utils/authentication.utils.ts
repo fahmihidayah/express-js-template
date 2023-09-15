@@ -28,16 +28,17 @@ export function createToken(user:User): TokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string | undefined = SECRET_KEY;
     const refreshKey: string | undefined = REFRESH_SECRET_KEY;
-    const expires_in: number = 60 * 60;
+    const expires_in: number = 30 * 24 * 60 * 60;
 
     return { expire_in : expires_in, 
-        access_token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : "14m" }),
-        refresh_token : sign(dataStoredInToken, refreshKey ?? "refresh-1234", { expiresIn : "30d" } )
+        access_token: sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : expires_in }),
+        refresh_token : sign(dataStoredInToken, refreshKey ?? "refresh-1234", { expiresIn : expires_in } )
     };
 }
 
 export function renewToken(id : number) : string {
     const dataStoredInToken: DataStoredInToken = { id: id };
+    const expires_in: number = 30 * 24 * 60 * 60;
     const secretKey: string | undefined = SECRET_KEY;
-    return sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : "14m" });
+    return sign(dataStoredInToken, secretKey ?? "test-1234", { expiresIn : expires_in });
 }

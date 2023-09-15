@@ -20,6 +20,7 @@ import { provide } from 'inversify-binding-decorators';
 export interface UserService {
     verify(code: string): Promise<UserNoPassword | null>
     login(form: LoginUserDto): Promise<UserWithToken>
+    logout(userData : UserData): Promise<boolean>
     register(form: CreateUserDto): Promise<UserNoPassword | null>
     refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null>
 
@@ -39,6 +40,10 @@ export class UserServiceImpl implements UserService {
     ) {
         this._userRepository = userRepositoryImpl
         this._userTokenRepository = userTokenRepositoryImpl
+    }
+
+    public async logout(userData: UserData): Promise<boolean> {
+        return await this._userTokenRepository.deleteByUser(userData.user);
     }
 
     public async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<string | null> {
@@ -67,11 +72,13 @@ export class UserServiceImpl implements UserService {
         const user = await this._userRepository.findById(id)
         return user
     }
-    public async findAllPaginate(usersQuery: BaseQuery = { page: 1, take: 10, keyword: "", orderBy: "id", orderByDirection: "asc" }): Promise<PaginateList<UserNoPassword[]>> {
+
+    public async findAllPaginate(usersQuery: BaseQuery): Promise<PaginateList<UserNoPassword[]>> {
         const users = await this._userRepository.findAllPaginate(usersQuery)
         return {
             page: users.page,
             total: users.total,
+            count : users.count,
             data: users.data.map(user => user.toUserNoPassword())
         }
     }

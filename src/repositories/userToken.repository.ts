@@ -10,6 +10,7 @@ export interface UserTokenRepository {
     createToken(user : User, token : string) : Promise<UserToken | null>
     findByUser(user : User | null) : Promise<UserToken | null>
     updateToken(user : User, token : string) : Promise<UserToken | null>
+    deleteByUser(user : User) : Promise<boolean>
 
 }
 
@@ -22,6 +23,14 @@ export class UserTokenRepositoryImpl implements UserTokenRepository {
         @inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient
     ) {
         this._userToken = _prismaClient.userToken
+    }
+
+    public async deleteByUser(user: User): Promise<boolean> {
+        const result = await this._userToken.delete({
+            where : {
+                user_id : user.id
+            }});
+        return result !== null
     }
     public async updateToken(user:User, token: string): Promise<UserToken | null> {
         return await this._userToken.update({
