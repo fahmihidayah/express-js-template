@@ -55,22 +55,3 @@ model Permission {
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
-
-model Task {
-  id          Int     @id @default(autoincrement())
-  title       String   
-  description String
-  completed   Boolean
-  category    Category    @relation(fields : [category_id], references: [id], onDelete: Cascade)
-  category_id Int         
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
-}
-
-model Category {
-  id          Int     @id   @default(autoincrement())
-  name        String  
-  tasks       Task[]
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
-}
