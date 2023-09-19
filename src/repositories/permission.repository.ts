@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Permission, PrismaClient, User, Prisma } from "@prisma/client";
 import { PermissionFormDto, PermissionFormWithRoleDto } from "../dtos/permission";
-import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository, CountRepository } from "./base";
+import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository, CountRepository, QueryAction, createQueryAction } from "./base";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
@@ -35,8 +35,24 @@ export class PermissionRepositoryImpl implements PermissionRepository {
 
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient: PrismaClient) {
         this._permission = _prismaClient.permission
-
     }
+
+    private createWhereInput(query: BaseQuery): Prisma.PermissionWhereInput | undefined {
+        const whereInputs: Prisma.PermissionWhereInput[] = []
+
+        query.extraQueries.forEach((value, key) => {
+            whereInputs.push({
+                [String(key)]: {
+                    contains: value
+                }
+            })
+        })
+        const whereInput: Prisma.PermissionWhereInput | undefined = whereInputs.length > 0 ? {
+            OR: whereInputs
+        } : undefined
+        return whereInput
+    }
+
     public async countByUser(PermissionId: number, userId: number): Promise<number> {
         return await this._permission.count({   
             where : {
@@ -145,70 +161,29 @@ export class PermissionRepositoryImpl implements PermissionRepository {
 
     public async countByQuery(query: BaseQuery): Promise<number> {
         return await this._permission.count({
-            where: {
-                OR: [
-                    {
-                        name: {
-                            contains: query.keyword
-                        },
-                    },
-                    {
-                        code_name: {
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+            where: this.createWhereInput(query)
         })
     }
 
     public async findAll(query: BaseQuery): Promise<Permission[]> {
         return await this._permission.findMany({
-            where: {
-                OR: [
-                    {
-                        name: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        code_name: {
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+            where: this.createWhereInput(query)
         })
     }
 
     public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Permission[]>> {
-        const { page, take } = query;
-        const skip: number = (page - 1) * take;
-        const count: number = await this.countByQuery(query)
-        const total: number = Math.ceil(count / take)
+        const queryAction : QueryAction = await createQueryAction(query, this)
+
         const data: Array<Permission> = await this._permission.findMany({
-            skip: skip,
-            take: take,
-            where: {
-                OR: [
-                    {
-                        name: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        code_name: {
-                            contains: query.keyword
-                        }
-                    },
-                ]
-            }
+            skip: queryAction.skip,
+            take: queryAction.take,
+            where: this.createWhereInput(query)
         })
 
         return {
-            count: count,
-            page: page,
-            total: total,
+            count: queryAction.count,
+            page: query.page,
+            total: queryAction.total,
             data: data
         };
     }

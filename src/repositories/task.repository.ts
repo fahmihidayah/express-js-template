@@ -28,6 +28,21 @@ export class TaskRepositoryImpl implements TaskRepository {
         this.taskDelegate = this._prisma.task;
     }
 
+    private createWhereInput(query : BaseQuery) : Prisma.TaskWhereInput | undefined {
+        const whereInputs : Prisma.TaskWhereInput[] = []
+
+        query.extraQueries.forEach((value, key) => {
+            whereInputs.push({
+                [String(key)] : {
+                    contains : value
+                }
+            })
+        })
+        const whereInput : Prisma.TaskWhereInput | undefined = whereInputs.length > 0 ? {
+            OR : whereInputs} : undefined
+        return whereInput
+    }
+
     public async create(form: TaskWithCategoryFormDto): Promise<TaskData | null> {
         const task = await this.taskDelegate.create({
             data: {
@@ -52,7 +67,8 @@ export class TaskRepositoryImpl implements TaskRepository {
             take: query.take,
             orderBy: {
                 [query.orderBy]: query.orderByDirection
-            }
+            },
+            where : this.createWhereInput(query)
         });
 
         return tasks.map(task => new TaskData(task));
@@ -60,14 +76,7 @@ export class TaskRepositoryImpl implements TaskRepository {
 
     public async countByQuery(query: BaseQuery): Promise<number> {
         return await this.taskDelegate.count({
-            where: {
-                title: {
-                    contains: query.keyword
-                },
-                description: {
-                    contains: query.keyword
-                }
-            }
+            where: this.createWhereInput(query)
         });
     }
     public async count(): Promise<number> {
@@ -86,26 +95,14 @@ export class TaskRepositoryImpl implements TaskRepository {
 
     public async findAllPaginate(query: BaseQuery): Promise<PaginateList<TaskData[]>> {
         const queryaAction = await createQueryAction<TaskData>(query, this);
-        const whereStatement : Prisma.TaskWhereInput[] = []
-
-        query.extraQueries.forEach((value, key) => {
-            whereStatement.push({
-                [String(key)] : {
-                    contains : value
-                }
-            })
-        })
-
-        const taskWhereInput : Prisma.TaskWhereInput | undefined = whereStatement.length > 0 ? {
-            OR : whereStatement} : undefined
-
+       
         const tasks = await this.taskDelegate.findMany({
             skip: queryaAction.skip,
             take: queryaAction.take,
             orderBy: {
                 [queryaAction.sort]: queryaAction.order
             },
-            where : taskWhereInput
+            where : this.createWhereInput(query)
         });
 
         return {

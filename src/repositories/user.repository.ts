@@ -5,7 +5,7 @@ import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
 import { PaginateList } from "../dtos";
-import { CreateRepository, DeleteRepository, BaseQuery, RetrieveRepository, UpdateRepository } from './base';
+import { CreateRepository, DeleteRepository, BaseQuery, RetrieveRepository, UpdateRepository, QueryAction, createQueryAction } from './base';
 import { provide } from 'inversify-binding-decorators';
 
 export interface UserRepository extends RetrieveRepository<UserData>,
@@ -31,6 +31,22 @@ export class UserRepositoryImpl implements UserRepository {
     ) {
         this._user = _prismaClient.user
     }
+
+    private createWhereInput(query : BaseQuery) : Prisma.UserWhereInput | undefined {
+        const whereInputs : Prisma.UserWhereInput[] = []
+
+        query.extraQueries.forEach((value, key) => {
+            whereInputs.push({
+                [String(key)] : {
+                    contains : value
+                }
+            })
+        })
+        const whereInput : Prisma.UserWhereInput | undefined = whereInputs.length > 0 ? {
+            OR : whereInputs} : undefined
+        return whereInput
+    }
+
     public async delete(id: number): Promise<UserData | null> {
         const user = await this._user.delete({
             where: {
@@ -46,26 +62,9 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     public async countByQuery(query: BaseQuery): Promise<number> {
+
         return await this._user.count({
-            where: {
-                OR: [
-                    {
-                        email: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        first_name: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        last_name: {
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+            where: this.createWhereInput(query)
         })
     }
 
@@ -156,65 +155,26 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     public async findAllPaginate(query: BaseQuery): Promise<PaginateList<UserData[]>> {
-        const { page, take } = query;
-        const skip: number = (page - 1) * take;
-        const count: number = await this.countByQuery(query)
-        const total: number = Math.ceil(count / take)
-        const data: Array<User> = await this._user.findMany({
-            skip: skip,
-            take: take,
-            where: {
-                OR: [
-                    {
-                        email: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        first_name: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        last_name: {
+        const queryAction : QueryAction = await createQueryAction(query, this)
+        
 
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+        const data: Array<User> = await this._user.findMany({
+            skip: queryAction.skip,
+            take: queryAction.take,
+            where: this.createWhereInput(query)
         })
 
         return {
-            count : count,
-            page: page,
-            total: total,
+            count : queryAction.count,
+            page: query.page,
+            total: queryAction.total,
             data: data.map((user) => new UserData(user))
         };
     }
 
     public async findAll(query: BaseQuery): Promise<Array<UserData>> {
         const users = await this._user.findMany({
-            where: {
-                OR: [
-                    {
-                        email: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        first_name: {
-                            contains: query.keyword
-                        }
-                    },
-                    {
-                        last_name: {
-
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+            where: this.createWhereInput(query)
         })
         return users.map((user) => new UserData(user))
     }

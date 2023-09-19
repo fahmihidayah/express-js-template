@@ -34,6 +34,21 @@ export class RoleRepositoryImpl implements RoleRepository {
         this._role = _prismaClient.role
     }
 
+    private createWhereInput(query : BaseQuery) : Prisma.RoleWhereInput | undefined {
+        const whereInputs : Prisma.RoleWhereInput[] = []
+
+        query.extraQueries.forEach((value, key) => {
+            whereInputs.push({
+                [String(key)] : {
+                    contains : value
+                }
+            })
+        })
+        const whereInput : Prisma.RoleWhereInput | undefined = whereInputs.length > 0 ? {
+            OR : whereInputs} : undefined
+        return whereInput
+    }
+
     public async createDefaultRole(): Promise<Role | null> {
         const defaultRole = await this._role.findFirst({
             where : {
@@ -108,15 +123,7 @@ export class RoleRepositoryImpl implements RoleRepository {
 
     public async countByQuery(query: BaseQuery): Promise<number> {
         return await this._role.count({
-            where : {
-                OR : [
-                    {
-                        name : {
-                            contains : query.keyword
-                        }
-                    }
-                ]
-            }
+            where : this.createWhereInput(query)
         })
     }
 
@@ -128,16 +135,7 @@ export class RoleRepositoryImpl implements RoleRepository {
         const data: Array<Role> = await this._role.findMany({
             skip: skip,
             take: take,
-            where: {
-                OR: [
-                    {
-                        name: {
-
-                            contains: query.keyword
-                        }
-                    }
-                ]
-            }
+            where: this.createWhereInput(query),
         })
         return {
             page: page,

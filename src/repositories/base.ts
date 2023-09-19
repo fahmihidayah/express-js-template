@@ -8,7 +8,6 @@ export class BaseQuery {
     constructor(
         public page: number = 1,
         public take: number = 10,
-        public keyword: string = "",
         public orderBy: string = "id",
         public orderByDirection: string = "asc",
         public _start: number = 0,
@@ -19,7 +18,6 @@ export class BaseQuery {
         public id: number[] = []) {
     }
 }
-
 
 export async function createQueryAction<T>(query: BaseQuery, repository: CountRepository<T>): Promise<QueryAction> {
     if (!query.isAdmin) {
