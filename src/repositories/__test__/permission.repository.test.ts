@@ -1,13 +1,15 @@
-import { Permission, User } from "@prisma/client"
+import { Permission, Role, User } from "@prisma/client"
 import { PermissionRepository, PermissionRepositoryImpl } from "../permission.repository"
 import { after } from "node:test"
+import { BaseQuery } from "../base"
 
 const prisma = jestPrisma.client
 
 describe('Auth Permission Repository', () => {
     let authPermission : Permission
+    let role : Role
     let user : User
-    let authPermissionRepository : PermissionRepository
+    let authPermissionRepository : PermissionRepositoryImpl
 
     beforeEach(async () => {
         user = await prisma.user.create({   
@@ -20,19 +22,28 @@ describe('Auth Permission Repository', () => {
             }
         })
 
-        authPermission = await prisma.authPermission.create({
+        role = await prisma.role.create({
             data : {
-                code_name : "create_user",
-                name : "User"
+                name : "USER"
             }
         })
 
-        authPermissionRepository = new AuthPermissionRepositoryImpl(prisma)
+        authPermission = await prisma.permission.create({
+            data : {
+                code_name : "create_user",
+                name : "User",
+                role : {
+                    connect : role
+                }
+            }
+        })
+
+        authPermissionRepository = new PermissionRepositoryImpl(prisma)
     })
     
     afterEach(async () => { 
         await prisma.user.deleteMany()
-        await prisma.authPermission.deleteMany()
+        await prisma.permission.deleteMany()
     })
 
 
@@ -41,21 +52,16 @@ describe('Auth Permission Repository', () => {
     test('create auth permission success', async () => {
         const authPermissionDto = {
             code_name : "create_user_test",
-            name : "User Test"
+            name : "User Test",
+            role : role
         }
-        const authPermissionRepository = new AuthPermissionRepositoryImpl(prisma)
+        const authPermissionRepository = new PermissionRepositoryImpl(prisma)
         const newAuthPermission = await authPermissionRepository.create(authPermissionDto)
         expect(newAuthPermission?.code_name).toEqual("create_user_test")
     })
 
     test('find all auth permission success', async () => {
-        const authPermissions = await authPermissionRepository.findAll({
-            page : 1,
-            take : 10,
-            keyword : "",
-            orderBy : "id",
-            orderByDirection : "desc",
-        })
+        const authPermissions = await authPermissionRepository.findAll(new BaseQuery())
         expect(authPermissions.length).toEqual(1)
     })
 
@@ -74,7 +80,7 @@ describe('Auth Permission Repository', () => {
 
     test('delete auth permission success', async () => {
         const isDeleted = await authPermissionRepository.delete(authPermission.id)
-        const count = await prisma.authPermission.count()
+        const count = await prisma.permission.count()
         expect(0).toEqual(count)
     })
 

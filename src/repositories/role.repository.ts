@@ -4,16 +4,18 @@ import { TYPE_PRISMA } from "../modules/prisma.container";
 import { PrismaClient, Role, Permission, User, Prisma } from "@prisma/client";
 import { RoleFormDto } from "../dtos/role";
 import { GetResult } from "@prisma/client/runtime/library";
-import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository } from "./base";
+import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository, CountRepository } from "./base";
 import { PaginateList } from "../dtos";
 import { provide } from "inversify-binding-decorators";
 
 export interface RoleRepository extends 
     RetrieveRepository<Role>,
     UpdateRepository<RoleFormDto, Role, number>,
+    CountRepository<Role>,
     CreateRepository<RoleFormDto, Role>,
     DeleteRepository<Role, number> {
         
+    createDefaultRole() : Promise<Role | null>
     addAuthPermission(RoleId : number, authPermission : Permission) : Promise<Role | null>
     removeAuthPermission(RoleId : number, authPermissionId : number) : Promise<Role | null>
 
@@ -31,6 +33,25 @@ export class RoleRepositoryImpl implements RoleRepository {
     constructor(@inject(TYPE_PRISMA.PrismaClient) private _prismaClient : PrismaClient) {
         this._role = _prismaClient.role
     }
+
+    public async createDefaultRole(): Promise<Role | null> {
+        const defaultRole = await this._role.findFirst({
+            where : {
+                name : "USER"
+            }
+        })
+        if(defaultRole !== null) {
+            return defaultRole
+        }
+        const role = await this._role.create({
+            data : {
+                name : "USER",
+            }
+        })
+        return role
+    }
+
+
     
     public async countRoleByUser(RoleId: number, userId : number): Promise<number> {
         return await this._role.count({

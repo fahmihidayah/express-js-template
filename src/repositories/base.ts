@@ -6,8 +6,8 @@ export class BaseQuery {
     public extraQueries : Map<String, String> = new Map<String, String>()
 
     constructor(
-        public page: number,
-        public take: number,
+        public page: number = 1,
+        public take: number = 10,
         public keyword: string = "",
         public orderBy: string = "id",
         public orderByDirection: string = "asc",

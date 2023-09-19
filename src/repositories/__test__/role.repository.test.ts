@@ -1,12 +1,13 @@
-import { Group, User } from "@prisma/client"
-import { GroupRepository, GroupRepositoryImpl } from "../role.repository"
+import { Role, User } from "@prisma/client"
+import { RoleRepository, RoleRepositoryImpl } from "../role.repository"
+import { BaseQuery } from "../base"
 
 const prisma = jestPrisma.client
 
 describe('Group Repository', () => {
-    let group : Group
+    let role : Role
 
-    let groupRepository : GroupRepository
+    let roleRepository : RoleRepositoryImpl
 
     let user : User
 
@@ -21,17 +22,17 @@ describe('Group Repository', () => {
             }
         })
 
-        group = await prisma.group.create({
+        role = await prisma.role.create({
             data : {
                 name : "group initial",
             }
         })
 
-        groupRepository = new GroupRepositoryImpl(prisma)
+        roleRepository = new RoleRepositoryImpl(prisma)
     })
 
     afterEach(async () => {
-        await prisma.group.deleteMany()
+        await prisma.role.deleteMany()
         await prisma.user.deleteMany()
     })
 
@@ -39,7 +40,7 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group 1"
         }
-        const newGroup = await groupRepository.create(groupDto)
+        const newGroup = await roleRepository.create(groupDto)
         expect(newGroup?.name).toEqual("group 1")
     })
 
@@ -47,14 +48,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group 1"
         }
-        const newGroup = await groupRepository.create(groupDto)
-        const groups = await groupRepository.findAll({
-            page : 1,
-            take : 10,
-            keyword : "",
-            orderBy : "id",
-            orderByDirection : "desc",
-        })
+        const newGroup = await roleRepository.create(groupDto)
+        const groups = await roleRepository.findAll(new BaseQuery())
         expect(groups.length).toEqual(2)
     })
 
@@ -62,8 +57,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.findById(newGroup.id)
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.findById(newGroup?.id)
         expect(group?.name).toEqual("group test")
     })
 
@@ -71,8 +66,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.update(newGroup.id, {
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.update(newGroup.id, {
             name : "group update"
         })
         expect(group?.name).toEqual("group update")
@@ -82,8 +77,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.delete(newGroup.id)
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.delete(newGroup.id)
         expect(group?.name).toEqual("group test")
     })
 
@@ -91,8 +86,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.count()
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.count()
         expect(group).toEqual(2)
     })
 
@@ -100,14 +95,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.countByQuery({
-            page : 1,
-            take : 10,
-            orderBy : "id",
-            orderByDirection : "desc",
-            keyword : ""
-        })
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.countByQuery(new BaseQuery())
         expect(group).toEqual(2)
     })
 
@@ -115,14 +104,8 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const groups = await groupRepository.findAllPaginate({
-            page : 1,
-            take : 10,
-            orderBy : "id",
-            orderByDirection : "desc",
-            keyword : ""
-        })
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const groups = await roleRepository.findAllPaginate(new BaseQuery())
         expect(groups.data.length).toEqual(2)
     })
 
@@ -130,9 +113,9 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        const group = await groupRepository.addUser(newGroup.id, user)
-        const numberOfUserInGroup = await groupRepository.countGroupByUser(newGroup.id, user.id)
+        const newGroup = await roleRepository.create(groupDto) as Role
+        const group = await roleRepository.addUser(newGroup.id, user)
+        const numberOfUserInGroup = await roleRepository.countRoleByUser(newGroup.id, user.id)
         expect(1).toEqual(numberOfUserInGroup)
     })
 
@@ -140,10 +123,10 @@ describe('Group Repository', () => {
         const groupDto = {
             name : "group test",
         }
-        const newGroup = await groupRepository.create(groupDto) as Group
-        await groupRepository.addUser(newGroup.id, user)
-        await groupRepository.removeUser(newGroup.id, user.id)
-        const numberOfUserInGroup = await groupRepository.countGroupByUser(newGroup.id, user.id)
+        const newGroup = await roleRepository.create(groupDto) as Role
+        await roleRepository.addUser(newGroup.id, user)
+        await roleRepository.removeUser(newGroup.id, user.id)
+        const numberOfUserInGroup = await roleRepository.countRoleByUser(newGroup.id, user.id)
         expect(0).toEqual(numberOfUserInGroup)
     });
 })

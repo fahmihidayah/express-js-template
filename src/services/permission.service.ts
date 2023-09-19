@@ -1,4 +1,4 @@
-import { Permission, User } from "@prisma/client"
+import { Permission, Role, User } from "@prisma/client"
 import { PermissionFormDto, AuthPermissionNameDto } from "../dtos/permission"
 import { BaseQuery } from "../repositories/base"
 import { PaginateList } from "../dtos"
@@ -7,30 +7,31 @@ import { PermissionRepository, PermissionRepositoryImpl } from "../repositories/
 import { GetResult } from "@prisma/client/runtime/library"
 import { UserRepository, UserRepositoryImpl } from "../repositories/user.repository"
 import { provide } from "inversify-binding-decorators"
+import { RoleRepositoryImpl } from "../repositories/role.repository"
 
 export interface PermissionService {
 
-    createFromName(form : AuthPermissionNameDto) : Promise<Array<Permission>>
+    createFromName(form: AuthPermissionNameDto): Promise<Array<Permission>>
 
-    deleteByName(name : string) : Promise<boolean>
+    deleteByName(name: string): Promise<boolean>
 
     create(form: PermissionFormDto): Promise<Permission | null>
 
     findAllPaginate(query: BaseQuery): Promise<PaginateList<Array<Permission>>>
 
-    update(id : number, form : PermissionFormDto): Promise<Permission | null>
+    update(id: number, form: PermissionFormDto): Promise<Permission | null>
 
     delete(id: number): Promise<Permission | null>
 
     findById(id: number): Promise<Permission | null>
 
-    addUser(PermissionId : number, userId : number) : Promise<Permission | null>
+    addUser(PermissionId: number, userId: number): Promise<Permission | null>
 
-    removeUser(PermissionId : number, userId : number) : Promise<Permission | null>
+    removeUser(PermissionId: number, userId: number): Promise<Permission | null>
 
-    isUserHasPermissionName(user : User, name : Array<string>) : Promise<boolean> 
+    isUserHasPermissionName(user: User, name: Array<string>): Promise<boolean>
 
-    isUserHasPermissionCodeName(user : User, codeName : Array<string>) : Promise<boolean> 
+    isUserHasPermissionCodeName(user: User, codeName: Array<string>): Promise<boolean>
 
 
 }
@@ -38,38 +39,38 @@ export interface PermissionService {
 @provide(PermissionServiceImpl)
 export class PermissionServiceImpl implements PermissionService {
 
-    private _PermissionRepository: PermissionRepository;
-    private _userRepository: UserRepository;
     constructor(
-        PermissionRepository: PermissionRepositoryImpl,
-        userRepository: UserRepositoryImpl,
-        ) { 
-            this._PermissionRepository = PermissionRepository
-            this._userRepository = userRepository
-        }
+        
+        private _permissionRepository: PermissionRepositoryImpl,
+        private _userRepository: UserRepositoryImpl,
+        private _roleRepository : RoleRepositoryImpl
+    ) {
+    }
 
     public async isUserHasPermissionName(user: User, name: string[]): Promise<boolean> {
-        const count = await this._PermissionRepository.countNamesByUser(name, user.id);
+        const count = await this._permissionRepository.countNamesByUser(name, user.id);
         return count >= 1;
     }
-    
+
     public async isUserHasPermissionCodeName(user: User, codeName: string[]): Promise<boolean> {
-        const count = await this._PermissionRepository.countCodeNamesByUser(codeName, user.id);
+        const count = await this._permissionRepository.countCodeNamesByUser(codeName, user.id);
         return count >= 1;
     }
 
     public async deleteByName(name: string): Promise<boolean> {
-        return await this._PermissionRepository.deleteByName(name)
+        return await this._permissionRepository.deleteByName(name)
     }
 
-        
+
     public async createFromName(form: AuthPermissionNameDto): Promise<Permission[]> {
         const codeNames = ["create", "read", "update", "delete"];
-        let listPermissions : Array<Permission> = [];
+        const defaultRole = await this._roleRepository.createDefaultRole();
+        let listPermissions: Array<Permission> = [];
         for (let codeName of codeNames) {
-            const Permission = await this._PermissionRepository.create({
-                name : form.name,
-                code_name : `${form.name}_${codeName}`
+            const Permission = await this._permissionRepository.create({
+                name: form.name,
+                code_name: `${form.name}_${codeName}`,
+                role: defaultRole as Role
             })
             listPermissions.push(Permission!)
         }
@@ -77,7 +78,7 @@ export class PermissionServiceImpl implements PermissionService {
     }
 
     public async update(id: number, form: PermissionFormDto): Promise<Permission | null> {
-        return await this._PermissionRepository.update(id, form)
+        return await this._permissionRepository.update(id, form)
     }
 
     public async addUser(PermissionId: number, userId: number): Promise<Permission | null> {
@@ -85,26 +86,31 @@ export class PermissionServiceImpl implements PermissionService {
         if (!user) {
             return null;
         }
-        return await this._PermissionRepository.addUser(PermissionId, user?.user);
+        return await this._permissionRepository.addUser(PermissionId, user?.user);
     }
 
     public async removeUser(PermissionId: number, userId: number): Promise<Permission | null> {
-        return await this._PermissionRepository.removeUser(PermissionId, userId)
+        return await this._permissionRepository.removeUser(PermissionId, userId)
     }
 
     public async create(form: PermissionFormDto): Promise<Permission | null> {
-        return await this._PermissionRepository.create(form)
+        const defaultRole = await this._roleRepository.createDefaultRole();
+        return await this._permissionRepository.create({
+            name: form.name,
+            code_name: form.code_name,
+            role: defaultRole as Role
+        })
     }
 
     public async findAllPaginate(query: BaseQuery): Promise<PaginateList<Permission[]>> {
-        return await this._PermissionRepository.findAllPaginate(query)
+        return await this._permissionRepository.findAllPaginate(query)
     }
 
     public async delete(id: number): Promise<Permission | null> {
-        return await this._PermissionRepository.delete(id)
+        return await this._permissionRepository.delete(id)
     }
 
     public async findById(id: number): Promise<Permission | null> {
-        return await this._PermissionRepository.findById(id)
+        return await this._permissionRepository.findById(id)
     }
 }

@@ -1,22 +1,29 @@
-import { AuthPermissionRepositoryImpl } from "../../repositories/permission.repository"
+import { PermissionRepository, PermissionRepositoryImpl } from "../../repositories/permission.repository"
+import { RoleRepositoryImpl } from "../../repositories/role.repository"
 import { UserRepository, UserRepositoryImpl } from "../../repositories/user.repository"
-import { PermissionService, AuthPermissionServiceImpl } from "../permission.service"
+import { PermissionService, PermissionServiceImpl } from "../permission.service"
 
 const prisma = jestPrisma.client
 describe("Auth Permission Service", () => {
-    let authPermissionRepository : AuthPermissionRepositoryImpl
+    let permissionRepository : PermissionRepositoryImpl
+    let roleRepository : RoleRepositoryImpl
     let userRepository : UserRepositoryImpl
-    let authPermissionService : PermissionService
+    let authPermissionService : PermissionServiceImpl
+
 
     beforeEach(async () => {
-        authPermissionRepository = new AuthPermissionRepositoryImpl(prisma)
+        permissionRepository = new PermissionRepositoryImpl(prisma)
         userRepository = new UserRepositoryImpl(prisma)
-        authPermissionService = new AuthPermissionServiceImpl(authPermissionRepository, userRepository)
+        roleRepository = new RoleRepositoryImpl(prisma)
+        authPermissionService = new PermissionServiceImpl(
+            permissionRepository, 
+            userRepository,
+            roleRepository)
     })
 
 
     afterEach(async () => {
-        await prisma.authPermission.deleteMany()
+        await prisma.permission.deleteMany()
         await prisma.user.deleteMany()
     });
 

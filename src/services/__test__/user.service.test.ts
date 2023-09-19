@@ -62,7 +62,7 @@ describe("User Service", () => {
     test('verify success', async () => {
         const userData = await userService.verify(user.email_verification_code)
         const userVerified = await userService.findById(user.id)
-        expect(userVerified?.is_email_verified).equal(true)
+        expect(userVerified?.user?.is_email_verified).equal(true)
     })
 
     test('refresh token success', async () => { 

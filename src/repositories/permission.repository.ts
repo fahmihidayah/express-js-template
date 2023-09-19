@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Permission, PrismaClient, User, Prisma } from "@prisma/client";
 import { PermissionFormDto, PermissionFormWithRoleDto } from "../dtos/permission";
-import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository } from "./base";
+import { CreateRepository, DeleteRepository, BaseQuery, Repository, RetrieveRepository, UpdateRepository, CountRepository } from "./base";
 import { inject, injectable } from "inversify";
 import { TYPE_PRISMA } from "../modules/prisma.container";
 import { GetResult } from "@prisma/client/runtime/library";
@@ -11,6 +11,7 @@ import { provide } from "inversify-binding-decorators";
 export interface PermissionRepository extends
     CreateRepository<PermissionFormDto, Permission>,
     RetrieveRepository<Permission>,
+    CountRepository<Permission>,
     UpdateRepository<PermissionFormDto, Permission, number>,
     DeleteRepository<Permission, number> {
 

@@ -3,6 +3,7 @@ import { UserRepository, UserRepositoryImpl } from "../user.repository"
 import { expect } from "chai";
 import { User } from ".prisma/client";
 import { before } from "node:test";
+import { BaseQuery } from "../base";
 
 const prisma = jestPrisma.client
 describe('user repository', () => {
@@ -40,20 +41,13 @@ describe('user repository', () => {
 
 
         const newUser = await userRepository?.create(userDto)
-        expect(newUser?.first_name).equal("fahmi")
+        expect(newUser?.user.first_name).equal("fahmi")
     })
 
     test('find all users success', async () => {
 
 
-        const result = await userRepository?.findAll({
-            page: 1,
-            take: 10,
-            keyword: "",
-            orderBy: "id",
-            orderByDirection: "desc"
-
-        });
+        const result = await userRepository?.findAll(new BaseQuery());
 
         expect(result.length).equal(1)
     })
@@ -61,14 +55,14 @@ describe('user repository', () => {
     test('find user by id', async () => {
         const result = await userRepository?.findById(user.id)
 
-        expect(result?.email).equal(user.email)
+        expect(result?.user?.email).equal(user.email)
     })
 
     test('find user by email', async () => {
 
         const result = await userRepository?.findByEmail(user.email)
 
-        expect(result?.email).equal(user.email)
+        expect(result?.user?.email).equal(user.email)
     })
 
     test('update all user fields by id success', async () => {
@@ -80,7 +74,7 @@ describe('user repository', () => {
             password: "Test123!"
         })
 
-        expect(result?.email).equal('test@testmail.com')
+        expect(result?.user?.email).equal('test@testmail.com')
     })
 
     test('update single user fields by id success', async () => {
@@ -92,7 +86,7 @@ describe('user repository', () => {
             password: null
         })
 
-        expect(result?.first_name).equal(user.first_name)
+        expect(result?.user?.first_name).equal(user.first_name)
     })
 
     test('findByVerifyCode failure', async () => {
@@ -106,7 +100,7 @@ describe('user repository', () => {
        
         const result = await userRepository.findByVerifyCode("123456789")
 
-        expect(result?.id).equal(user.id)
+        expect(result?.user?.id).equal(user.id)
     })
 
 })
